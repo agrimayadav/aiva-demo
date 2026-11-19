@@ -29,46 +29,64 @@
 
   const KW = {
     clinic: {
-      indiranagar: ['indiranagar', 'indira nagar', 'indira', 'इंदिरा', 'इंदिरानगर'],
-      koramangala: ['koramangala', 'kormangala', 'kora', 'कोरमंगला', 'कोरमंगल'],
-      whitefield: ['whitefield', 'white field', 'itpl', 'व्हाइटफ़ील्ड', 'व्हाइटफील्ड', 'वाइटफील्ड']
+      indiranagar: ['indiranagar', 'indira nagar', 'indira', 'इंदिरा', 'इंदिरानगर', 'इंद्रानगर'],
+      koramangala: ['koramangala', 'kormangala', 'kora', 'कोरमंगला', 'कोरमंगल', 'कोरामंगला'],
+      whitefield: ['whitefield', 'white field', 'itpl', 'व्हाइटफ़ील्ड', 'व्हाइटफील्ड', 'वाइटफील्ड', 'व्हाइट फील्ड']
     },
     treatment: {
-      braces: ['brace', 'aligner', 'crooked', 'straighten', 'ब्रेस', 'ब्रेसेस', 'टेढ़े', 'tedhe', 'clip', 'क्लिप'],
-      whitening: ['whiten', 'white', 'yellow', 'safed', 'सफ़ेद', 'सफेद', 'पीले', 'peele', 'व्हाइटनिंग', 'वाइटनिंग'],
+      braces: ['brace', 'aligner', 'crooked', 'straighten', 'ब्रेस', 'ब्रेसेस', 'ब्रेसिस', 'ब्रेसेज़', 'टेढ़े', 'tedhe', 'clip', 'क्लिप', 'अलाइनर'],
+      whitening: ['whiten', 'white', 'yellow', 'safed', 'सफ़ेद', 'सफेद', 'पीले', 'peele', 'व्हाइटनिंग', 'वाइटनिंग', 'व्हाइट'],
       implant: ['implant', 'missing tooth', 'missing teeth', 'इम्प्लांट', 'इंप्लांट', 'नकली दाँत', 'nakli'],
-      cleaning: ['clean', 'scaling', 'सफ़ाई', 'सफाई', 'safai', 'क्लीनिंग'],
+      cleaning: ['clean', 'scaling', 'सफ़ाई', 'सफाई', 'safai', 'क्लीनिंग', 'स्केलिंग'],
       rct: ['root canal', 'rct', 'रूट कैनाल', 'रूट', 'आरसीटी'],
-      checkup: ['check', 'consult', 'चेक', 'जाँच', 'जांच', 'janch']
+      checkup: ['check', 'consult', 'चेक', 'जाँच', 'जांच', 'janch', 'कंसल्ट']
     },
+    book: ['book', 'appointment', 'बुक', 'अपॉइंटमेंट', 'अपॉइंटमेंट', 'slot', 'स्लॉट', 'dentist', 'डेंटिस्ट', 'dikhana', 'दिखाना', 'help', 'मदद'],
+    hello: ['hello', 'hi', 'hey', 'namaste', 'नमस्ते', 'हेलो', 'हैलो', 'good morning', 'good evening'],
     urgentStrong: ['swell', 'swollen', 'bleed', 'blood', 'fever', 'abscess', 'pus', 'broken tooth', 'tooth broke', 'accident', 'emergency',
-      'sujan', 'soojan', 'सूजन', 'khoon', 'खून', 'bukhar', 'बुखार', 'टूट', 'इमरजेंसी', 'मवाद'],
-    painWords: ['pain', 'hurt', 'ache', 'dard', 'दर्द'],
+      'sujan', 'soojan', 'सूजन', 'khoon', 'खून', 'bukhar', 'बुखार', 'टूट', 'इमरजेंसी', 'मवाद', 'स्वेलिंग', 'ब्लीडिंग'],
+    painWords: ['pain', 'hurt', 'ache', 'dard', 'दर्द', 'पेन'],
     questionWords: ['will ', 'does ', 'is it', 'is the', 'would ', '?', 'hoga', 'होगा', 'होता', 'kya ', 'क्या '],
     medical: ['medicine', 'tablet', 'dawai', 'दवा', 'दवाई', 'eat', 'khana', 'खाना', 'safe', 'side effect', 'should i', 'infection',
       'antibiotic', 'x-ray', 'xray', 'pregnan', 'diabet', 'sugar', 'normal hai', 'नॉर्मल', 'painful', 'dard hoga', 'दर्द होगा'],
     negotiate: ['discount', 'cheaper', 'sasta', 'सस्ता', 'kam kar', 'कम कर', 'emi', 'ईएमआई', 'insurance', 'बीमा', 'offer', 'negotiat',
       'installment', 'kist', 'किस्त'],
     human: ['human', 'real person', 'a person', 'staff', 'receptionist', 'insaan', 'इंसान', 'kisi se baat', 'किसी से बात', 'manager',
-      'call me back', 'callback', 'असली'],
-    cancel: ['cancel', 'रद्द', 'radd', 'कैंसल'],
-    price: ['price', 'cost', 'charge', 'fee', 'kitna', 'कितना', 'kitne', 'कितने', 'rate', 'paise', 'पैसे', 'kharcha', 'खर्च', 'कीमत', 'keemat'],
-    hours: ['timing', 'open', 'hours', 'kab khul', 'कब खुल', 'khula', 'खुला', 'sunday', 'ravivar', 'रविवार'],
-    location: ['where', 'address', 'location', 'kahan', 'कहाँ', 'कहां', 'direction', 'पता'],
-    no: ["don't", 'dont', 'not ok', 'nope', 'nahi', 'nahin', 'नहीं', 'नही', 'mat ', 'मत', 'no'],
+      'call me back', 'callback', 'असली', 'पर्सन', 'स्टाफ'],
+    cancel: ['cancel', 'रद्द', 'radd', 'कैंसल', 'कैंसिल'],
+    price: ['price', 'cost', 'charge', 'fee', 'kitna', 'कितना', 'kitne', 'कितने', 'rate', 'paise', 'पैसे', 'kharcha', 'खर्च', 'कीमत', 'keemat',
+      'प्राइस', 'कॉस्ट', 'चार्ज', 'फीस'],
+    hours: ['timing', 'open', 'hours', 'kab khul', 'कब खुल', 'khula', 'खुला', 'sunday', 'ravivar', 'रविवार', 'टाइमिंग'],
+    location: ['where', 'address', 'location', 'kahan', 'कहाँ', 'कहां', 'direction', 'पता', 'लोकेशन', 'एड्रेस'],
+    no: ["don't", 'dont', 'not ok', 'nope', 'nahi', 'nahin', 'नहीं', 'नही', 'mat ', 'मत', 'no', 'नो'],
     yes: ['yes', 'yeah', 'yup', 'sure', 'okay', 'ok', 'fine', 'haan', 'han', 'हाँ', 'हां', 'ठीक', 'theek', 'thik', 'bilkul', 'बिल्कुल',
-      'go ahead', 'chalega', 'चलेगा', 'ji', 'जी'],
-    first: ['first', 'one', 'pehla', 'pehle', 'पहला', 'पहले', 'एक', ' ek '],
-    second: ['second', 'two', 'doosra', 'dusra', 'दूसरा', 'दूसरे', ' do '],
+      'go ahead', 'chalega', 'चलेगा', 'ji', 'जी', 'यस', 'ओके', 'श्योर'],
+    first: ['first', 'one', 'pehla', 'pehle', 'पहला', 'पहले', 'एक', ' ek ', 'फर्स्ट'],
+    second: ['second', 'two', 'doosra', 'dusra', 'दूसरा', 'दूसरे', ' do ', 'सेकंड', 'सेकेंड'],
     otherSlot: ['none', 'neither', 'other', 'another', 'koi aur', 'कोई और', 'different', 'kuch aur', 'कुछ और'],
-    days: { sat: ['saturday', 'sat ', 'shani', 'शनि'], fri: ['friday', 'fri ', 'shukr', 'शुक्र'], thu: ['thursday', 'thu ', 'guru', 'गुरु'] }
+    days: { sat: ['saturday', 'sat ', 'shani', 'शनि', 'सैटरडे'], fri: ['friday', 'fri ', 'shukr', 'शुक्र', 'फ्राइडे'], thu: ['thursday', 'thu ', 'guru', 'गुरु', 'थर्सडे'] }
   };
 
   // Short latin keywords match whole words only (so "ok" doesn't match "book").
   const has = (t, list) => list.some(k => {
     if (/^[a-z]+$/.test(k) && k.length <= 3) return new RegExp('(^|[^a-z])' + k + '([^a-z]|$)').test(t);
+    if (/^[\u0900-\u097F]+$/.test(k) && k.length <= 2) return t.includes(' ' + k + ' ');
     return t.includes(k);
   });
+
+  // Per-turn language detection: reply in the language the caller is using (Hinglish -> Hindi replies).
+  const HI_MARK = ['है', 'हैं', 'मुझे', 'मेरा', 'मेरे', 'मेरी', 'नहीं', 'हाँ', 'हां', 'क्या', 'कितना', 'कितने', 'कब', 'कहाँ', 'कहां', 'चाहिए',
+    'करना', 'करवाना', 'करवानी', 'लगवाने', 'जी', 'ठीक', 'बजे', 'में', 'का', 'की', 'के', 'और', 'दीजिए', 'बताइए', 'बताओ', 'धन्यवाद', 'शुक्रिया', 'वाला', 'वाले',
+    'hai', 'hain', 'mujhe', 'mera', 'meri', 'mere', 'nahi', 'nahin', 'haan', 'kya', 'kitna', 'kitne', 'kab', 'kahan', 'chahiye', 'karna',
+    'karwana', 'karwani', 'lagwane', 'lagwana', 'baje', 'ji', 'theek', 'thik', 'aur', 'wala', 'batao', 'bataiye', 'dijiye', 'kaise', 'accha', 'achha', 'ka', 'ki', 'ke', 'mein'];
+  const EN_MARK = ['i', "i'm", 'want', 'the', 'is', 'my', 'what', 'how', 'much', 'can', 'please', 'yes', 'no', 'okay', 'thanks', 'thank',
+    'where', 'when', 'need', 'would', 'like', 'you', 'for', 'to', 'a', 'it', 'does', 'get', 'book', 'appointment',
+    'यस', 'ओके', 'प्लीज', 'थैंक', 'थैंक्यू', 'आई', 'वांट', 'माय', 'व्हाट', 'हाउ'];
+  function detectLang(raw) {
+    const words = String(raw).toLowerCase().replace(/[.,!?।]/g, ' ').split(/\s+/).filter(Boolean);
+    const hi = words.filter(w => HI_MARK.includes(w)).length, en = words.filter(w => EN_MARK.includes(w)).length;
+    return hi > en ? 'hi' : en > hi ? 'en' : null;
+  }
   const findKey = (t, map) => Object.keys(map).find(k => has(t, map[k]));
   const stripClinics = t => Object.values(KW.clinic).flat().reduce((s, k) => s.split(k).join(' '), t);
   const cap = x => x.charAt(0).toUpperCase() + x.slice(1);
@@ -79,8 +97,12 @@
 
   const T = {
     greet: {
-      en: "Namaste! I'm AIVA, HappySmile Dental's AI assistant, not a human. I can book a consultation or answer questions on timings, locations and prices. This call is recorded so our team can follow up. Is that okay?",
-      hi: 'नमस्ते! मैं AIVA हूँ, HappySmile Dental की AI असिस्टेंट, इंसान नहीं। मैं आपका कंसल्टेशन बुक कर सकती हूँ, या टाइमिंग, लोकेशन और कीमत के बारे में बता सकती हूँ। यह कॉल रिकॉर्ड हो रही है ताकि हमारी टीम फ़ॉलो-अप कर सके। क्या यह ठीक है?'
+      en: "Welcome to HappySmile's AI assistant. This call is being recorded. You can talk to me in English or Hindi. How can I help you today?",
+      hi: 'HappySmile की AI असिस्टेंट में आपका स्वागत है। यह कॉल रिकॉर्ड हो रही है। आप मुझसे हिंदी या इंग्लिश में बात कर सकते हैं। बताइए, मैं आपकी क्या मदद करूँ?'
+    },
+    openHelp: {
+      en: 'Sure. Is this for braces, whitening, an implant, a cleaning, a root canal, or a general check-up?',
+      hi: 'ज़रूर। ब्रेसेस, व्हाइटनिंग, इम्प्लांट, सफ़ाई, रूट कैनाल, या जनरल चेक-अप, किसके लिए?'
     },
     askTreatment: {
       en: 'Which treatment are you interested in: braces, whitening, implants, cleaning, root canal, or a general check-up?',
@@ -171,12 +193,12 @@
 
   function createSession(opts) {
     opts = opts || {};
-    const lang = opts.lang === 'hi' ? 'hi' : 'en';
+    let lang = opts.lang === 'hi' ? 'hi' : 'en';
     const rules = loadRules();
     const extraUrgent = (rules.urgentExtra || '').split(',').map(v => v.trim().toLowerCase()).filter(Boolean);
     const s = {
       id: 'L' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
-      lang, source: opts.source || 'Website enquiry', state: 'consent', consent: false,
+      lang, source: opts.source || 'Website enquiry', state: 'treatment', consent: true, langsUsed: {},
       treatment: opts.treatment || null, enquiredTreatment: opts.treatment || null,
       clinic: null, slot: null, name: null, cancelledName: null, misses: 0, confidence: 1, slotsOffered: false,
       outcome: null, handoff: null, transcript: [], startedAt: Date.now(), endedAt: null, lastUserQuote: '', ended: false
@@ -209,7 +231,8 @@
 
     // Safety and info intents are checked at every step, before the booking flow.
     function globalIntents(x) {
-      const isQuestion = has(x, KW.questionWords);
+      const isQuestion = has(x, KW.questionWords) || /\?/.test(s.lastUserQuote);
+      if (has(x, ['record', 'रिकॉर्ड', 'रिकॉर्डिंग']) && has(x, KW.no)) return handoff('noConsent');
       if (has(x, KW.urgentStrong) || extraUrgent.some(k => x.includes(k)) || (has(x, KW.painWords) && !isQuestion)) return handoff('P0');
       if (has(x, KW.medical) || (has(x, KW.painWords) && isQuestion)) return handoff('medical');
       if (has(x, KW.negotiate)) return handoff('negotiate');
@@ -252,7 +275,9 @@
 
     s.handle = function (raw) {
       if (s.ended) return '';
-      const x = ' ' + String(raw || '').toLowerCase().trim() + ' ';
+      const x = ' ' + String(raw || '').toLowerCase().replace(/[.,!?।]/g, ' ').trim() + ' ';
+      const dl = detectLang(raw); if (dl) { lang = dl; s.lang = dl; }
+      s.langsUsed[s.lang] = true;
       s.transcript.push({ who: 'Caller', text: String(raw) });
       s.lastUserQuote = String(raw);
 
@@ -305,7 +330,11 @@
       if (s.state === 'treatment') {
         const tk = findKey(stripClinics(x), KW.treatment);
         const ck = findKey(x, KW.clinic);
-        if (!tk) { if (ck) s.clinic = ck; return miss(t('askTreatment')); }
+        if (!tk) {
+          if (ck) s.clinic = ck;
+          if (!s.openHelped && (ck || has(x, KW.book) || has(x, KW.yes) || has(x, KW.hello))) { s.openHelped = true; return say(t('openHelp')); }
+          return miss(t('askTreatment'));
+        }
         s.treatment = tk;
         if (ck || s.clinic) { s.clinic = ck || s.clinic; return say(t('gotTreatment', trName(tk)) + ' ' + goto('slot')); }
         return say(t('gotTreatment', trName(tk)) + ' ' + goto('clinic'));
@@ -326,8 +355,8 @@
         const slots = DB.clinics[s.clinic].slots;
         let pick = null;
         slots.forEach((sl, i) => { if (new RegExp('(^|[^0-9])' + sl.h + '([^0-9]|$)').test(x) || has(x, sl.w)) pick = i; });
-        if (pick === null && has(x, KW.first)) pick = 0;
         if (pick === null && has(x, KW.second)) pick = 1;
+        if (pick === null && has(x, KW.first)) pick = 0;
         if (pick === null) {
           const byDay = slots.map((sl, i) => has(x, KW.days[sl.d]) ? i : -1).filter(i => i >= 0);
           if (byDay.length === 1) pick = byDay[0];
@@ -351,13 +380,13 @@
       const tr = tk ? DB.treatments[tk].en : 'not stated';
       const cl = s.clinic ? DB.clinics[s.clinic].en : null;
       const sl = s.clinic && s.slot !== null ? DB.clinics[s.clinic].slots[s.slot].en : null;
-      const langName = s.lang === 'hi' ? 'Hindi' : 'English';
+      const langName = Object.keys(s.langsUsed).length > 1 ? 'Hinglish (Hindi + English)' : (s.lang === 'hi' ? 'Hindi' : 'English');
       let summary;
       if (s.outcome === 'booked') summary = `Booked ${tr} consultation at ${cl}, ${sl}, for ${s.name}. Spoke ${langName}.` + (s.handoff ? ` Later flagged: ${s.handoff.reason}.` : '');
       else if (s.outcome === 'handoff') summary = `${s.handoff.reason}. Interested in ${tr}${cl ? ' at ' + cl : ''}. Caller said: "${s.lastUserQuote}". Spoke ${langName}.`;
       else if (s.outcome === 'cancelled') summary = `Cancelled the booking under ${s.cancelledName}; did not rebook. Spoke ${langName}.`;
       else if (s.outcome === 'info') summary = `Asked for information only (${tr}); did not book. Spoke ${langName}.`;
-      else summary = s.slotsOffered ? `Hung up after hearing slot options${cl ? ' at ' + cl : ''} (${tr}).` : `Hung up after ${dur}s, ${s.consent ? 'after' : 'before'} agreeing to the AI call.`;
+      else summary = s.slotsOffered ? `Hung up after hearing slot options${cl ? ' at ' + cl : ''} (${tr}).` : (s.transcript.some(x => x.who === 'Caller') ? `Hung up after ${dur}s, before booking.` : `Hung up after ${dur}s without saying anything.`);
       const priority = s.handoff ? s.handoff.priority : null;
       return {
         id: s.id, time: s.startedAt, lang: langName, source: s.source, treatment: tr, clinic: cl, slot: sl, name: s.name || s.cancelledName || null,

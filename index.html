@@ -2,81 +2,33 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AIVA · HappySmile – Screen 1: the enquiry moment</title>
-<link rel="icon" href="data:,"><link rel="stylesheet" href="style.css">
+<title>Call HappySmile</title>
+<link rel="icon" href="data:,">
+<style>
+  *{box-sizing:border-box}[hidden]{display:none!important}
+  html,body{height:100%;margin:0}
+  body{font-family:Segoe UI,system-ui,-apple-system,Roboto,sans-serif;background:radial-gradient(circle at 50% 40%,#e9f7f7,#f7fafb 60%);color:#1d2939;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px}
+  #call{width:190px;height:190px;border-radius:50%;border:0;cursor:pointer;color:#fff;font:600 20px/1.3 inherit;
+    background:#0e7c86;box-shadow:0 12px 30px rgba(14,124,134,.35);transition:background .2s,transform .1s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+  #call:active{transform:scale(.97)}
+  #call .ic{font-size:44px;line-height:1}
+  #call.live{background:#d92d20;box-shadow:0 12px 30px rgba(217,45,32,.35)}
+  #call.speaking{animation:ring 1.6s ease-out infinite}
+  #call.listening{animation:ringRed 1.6s ease-out infinite}
+  @keyframes ring{0%{box-shadow:0 0 0 0 rgba(14,124,134,.45)}100%{box-shadow:0 0 0 34px rgba(14,124,134,0)}}
+  @keyframes ringRed{0%{box-shadow:0 0 0 0 rgba(217,45,32,.4)}100%{box-shadow:0 0 0 34px rgba(217,45,32,0)}}
+  #status{min-height:22px;font-size:15px;color:#475467;text-align:center;max-width:90vw}
+  #typed{display:flex;gap:6px}#typed input{width:300px;max-width:70vw;padding:10px;border:1px solid #d0d5dd;border-radius:8px;font-size:15px}
+  #typed button{padding:10px 14px;border:0;border-radius:8px;background:#0e7c86;color:#fff;font-weight:600;cursor:pointer}
+  footer{position:fixed;bottom:12px;font-size:12px;color:#98a2b3;text-align:center;padding:0 12px}footer a{color:#0e7c86}
+</style>
 </head>
 <body>
-<div class="top">
-  <div class="logo">HappySmile <span>Dental</span></div>
-  <div class="nav"><a class="on" href="index.html">① Patient: enquiry moment</a><a href="dashboard.html">② Front desk: what HappySmile sees</a></div>
-</div>
-<div class="banner">Fictional demo for a product case. Clinics, prices and slots are made up. AIVA here is a rule-based prototype; production would use an LLM + Indic speech models with the same guardrails. Best in Chrome or Edge (voice); typing works everywhere.</div>
-
-<div class="wrap grid">
-  <div class="card">
-    <h1>Thanks! We've got your enquiry.</h1>
-    <p class="sub">This is what a person sees the moment they ask HappySmile to contact them (website form, Instagram/Google ad or listing site).</p>
-
-    <label>Enquiry about</label>
-    <select id="treatment">
-      <option value="braces">Braces</option><option value="whitening">Teeth whitening</option><option value="implant">Dental implant</option>
-      <option value="cleaning">Cleaning</option><option value="rct">Root canal</option><option value="">Not sure yet</option>
-    </select>
-    <label>Came from</label>
-    <select id="source"><option>Website enquiry</option><option>Instagram ad</option><option>Google ad</option><option>Listing site</option></select>
-
-    <label>Preferred language</label>
-    <div class="seg" id="langSeg"><button data-l="en" class="on">English / Hinglish</button><button data-l="hi">हिंदी</button></div>
-
-    <div style="margin-top:18px">
-      <button class="btn big" id="talkBtn">📞 Talk to AIVA now (no waiting)</button>
-      <div class="fine"><b>AIVA is HappySmile's AI assistant, not a person.</b> It can book a consultation, cancel a booking, and answer questions on timings, locations and prices. It doesn't give medical advice. The call is recorded to book your visit; AIVA will ask for your OK first. Available 9 AM–8 PM.</div>
-    </div>
-
-    <div class="alt">
-      <button class="btn red" id="painBtn">🦷 In pain or swelling? Our staff will call you</button>
-      <button class="btn ghost" id="humanBtn">🙋 Prefer a person? Request a callback</button>
-      <div id="altMsg"></div>
-    </div>
-
-    <details>
-      <summary>Demo script: things to try</summary>
-      <ul>
-        <li><b>Happy path:</b> "yes" → "braces" → "Koramangala" → "Friday 6 pm" → "Rahul"</li>
-        <li><b>Info then book:</b> "yes" → "how much is an implant?" → "Whitefield" → "the second one" → "Anil"</li>
-        <li><b>Urgent (P0):</b> "yes" → "my tooth is swollen and hurts" → AIVA <i>won't</i> book and flags urgent</li>
-        <li><b>Clinical (P1):</b> "is root canal painful?" → no medical advice, handed to staff</li>
-        <li><b>Price talk (P1):</b> "do you have EMI?" · <b>Human (P2):</b> "can I talk to a person"</li>
-        <li><b>No consent:</b> answer "no" to the first question</li>
-        <li><b>Cancellation:</b> "yes" → "I want to cancel my appointment" → "Sunita"</li>
-        <li><b>Hindi:</b> pick हिंदी → "हाँ" → "ब्रेसेस" → "इंदिरानगर" → "शनिवार चार बजे" → "मेरा नाम अमित है"</li>
-        <li><b>Drop-off:</b> start a call and press End call. It shows up as an early drop in the front-desk metrics.</li>
-      </ul>
-    </details>
-  </div>
-
-  <div class="phone">
-    <div class="ph-head">
-      <div class="avatar">AI</div>
-      <div style="flex:1"><div class="ph-name">AIVA · HappySmile AI assistant</div>
-        <div class="ph-meta" id="phMeta">Not connected</div></div>
-      <label class="toggle" style="color:#98a2b3;margin:0" title="AIVA speaks aloud"><input type="checkbox" id="voiceOn" checked> 🔊 voice</label>
-    </div>
-    <div class="ph-idle" id="idle">
-      <div style="font-size:42px">📞</div>
-      <div>Tap <b style="color:#fff">Talk to AIVA now</b> to start.<br>Speak with the 🎤 button or type your reply.</div>
-    </div>
-    <div class="chat" id="chat" hidden></div>
-    <div class="status" id="status"></div>
-    <div class="ph-ctrl" id="ctrl" hidden>
-      <button class="mic" id="mic" title="Hands-free voice: tap to start/stop">🎤</button>
-      <input type="text" id="txt" placeholder="Type your reply…">
-      <button class="btn sm" id="send">Send</button>
-      <button class="btn sm red" id="endBtn">End</button>
-    </div>
-  </div>
-</div>
-
+  <button id="call"><span class="ic">📞</span><span id="label">Call HappySmile</span></button>
+  <div id="status"></div>
+  <div id="typed" hidden><input id="txt" placeholder="Voice not available here. Type your reply"><button id="send">Send</button></div>
+  <footer>Fictional demo · best in Microsoft Edge (most natural voice) or Chrome · allow the microphone · <a href="dashboard.html">Front-desk view →</a></footer>
 <script src="engine.js"></script>
 <script src="store.js"></script>
 <script src="app.js"></script>

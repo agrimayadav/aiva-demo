@@ -1,108 +1,162 @@
-// Screen 1: enquiry moment + AIVA call (browser voice via Web Speech API, typing fallback).
+// Screen 1: one "Call HappySmile" button. Hands-free voice call in the browser.
+// Speech out: best available neural voice (Edge "Natural" voices sound most human).
+// Speech in: hi-IN recognition (handles Hindi, English and Hinglish code-mixing); engine picks reply language per turn.
 (function () {
   const $ = id => document.getElementById(id);
-  let lang = 'en', sess = null, timer = null, rec = null, listening = false, handsFree = false;
+  const TEST = /[?&]test\b/.test(location.search);
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const hasTTS = 'speechSynthesis' in window;
+  let sess = null, t0 = 0, tick = null, rec = null, recToken = 0, silenceTimer = null, nudges = 0, typedMode = false;
+  const keep = []; // keep utterances referenced (Chrome drops onend for GC'd utterances)
 
-  document.querySelectorAll('#langSeg button').forEach(b => b.onclick = () => {
-    if (sess && !sess.ended) return;
-    document.querySelectorAll('#langSeg button').forEach(x => x.classList.remove('on'));
-    b.classList.add('on'); lang = b.dataset.l;
-  });
-
-  // ---- speech out
+  // ---------- voice out ----------
   let voices = [];
-  const loadVoices = () => { voices = speechSynthesis ? speechSynthesis.getVoices() : []; };
-  if ('speechSynthesis' in window) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
-  function pickVoice() {
-    const want = lang === 'hi' ? ['hi-IN'] : ['en-IN', 'en-GB', 'en-US'];
-    for (const w of want) {
-      const female = voices.find(v => v.lang === w && /female|swara|neerja|heera|kalpana|zira|aria|google/i.test(v.name));
-      const any = voices.find(v => v.lang === w);
-      if (female || any) return female || any;
-    }
+  const loadVoices = () => { voices = hasTTS ? speechSynthesis.getVoices() : []; };
+  if (hasTTS) { loadVoices(); speechSynthesis.addEventListener('voiceschanged', loadVoices); }
+  const voicesReady = () => voices.length || !hasTTS ? Promise.resolve() : new Promise(r => {
+    const t = setTimeout(r, 1500); speechSynthesis.addEventListener('voiceschanged', () => { clearTimeout(t); loadVoices(); r(); }, { once: true });
+  });
+  function pickVoice(lang) {
+    const L = lang === 'hi' ? 'hi-IN' : 'en-IN';
+    const prefs = lang === 'hi'
+      ? [v => /Swara/i.test(v.name) && /Natural/i.test(v.name), v => v.lang === L && /Natural/i.test(v.name), v => /Google/i.test(v.name) && v.lang === L, v => v.lang === L]
+      : [v => /Neerja/i.test(v.name) && /Natural/i.test(v.name), v => v.lang === L && /Natural/i.test(v.name), v => /Natural/i.test(v.name) && /^en/.test(v.lang) && /Female|Aria|Jenny|Sonia|Natasha/i.test(v.name),
+         v => v.name === 'Google UK English Female', v => v.lang === L, v => /^en/.test(v.lang)];
+    for (const p of prefs) { const v = voices.find(p); if (v) return v; }
     return null;
   }
-  function speak(text, then) {
-    if (!$('voiceOn').checked || !('speechSynthesis' in window) || !text) { then && then(); return; }
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text.replace(/₹/g, lang === 'hi' ? 'रुपये ' : 'rupees ').replace(/–/g, lang === 'hi' ? ' से ' : ' to '));
-    const v = pickVoice(); if (v) u.voice = v;
-    u.lang = lang === 'hi' ? 'hi-IN' : 'en-IN'; u.rate = 1.02; u.pitch = 1.05;
-    u.onend = () => then && then(); u.onerror = () => then && then();
-    status('AIVA is speaking…'); speechSynthesis.speak(u);
+  // Make text sound spoken, not read: "₹6,000–12,000" -> "6,000 to 12,000 rupees".
+  function spoken(text, lang) {
+    let t = text.replace(/HappySmile/g, 'Happy Smile').replace(/\s*\(RCT\)/g, '');
+    t = t.replace(/₹([\d,]+)\s*[–-]\s*([\d,]+)/g, (m, a, b) => lang === 'hi' ? `${a} से ${b} रुपये` : `${a} to ${b} rupees`);
+    t = t.replace(/₹([\d,]+)/g, (m, a) => lang === 'hi' ? `${a} रुपये` : `${a} rupees`);
+    if (lang === 'hi') t = t.replace(/per tooth/g, 'प्रति दाँत');
+    return t.replace(/\s*\(([^)]*)\)/g, ', $1,').replace(/\s+/g, ' ').trim();
+  }
+  function speak(text) {
+    return new Promise(res => {
+      if (TEST || !hasTTS || !text) return res();
+      const lang = /[\u0900-\u097F]/.test(text) ? 'hi' : 'en';
+      const v = pickVoice(lang), natural = v && /Natural|Online/i.test(v.name);
+      const say = spoken(text, lang);
+      // Neural voices read a whole reply smoothly in one go; local voices cut out on long text, so queue sentences back-to-back.
+      const chunks = natural ? [say] : say.split(/(?<=[.!?।])\s+/).filter(Boolean);
+      let done = false;
+      const fin = () => { if (done) return; done = true; clearTimeout(guard); mode(''); res(); };
+      const guard = setTimeout(fin, 5000 + say.length * 120);
+      keep.length = 0; mode('speaking');
+      chunks.forEach((c, i) => {
+        const u = new SpeechSynthesisUtterance(c);
+        if (v) u.voice = v; u.lang = v ? v.lang : (lang === 'hi' ? 'hi-IN' : 'en-IN'); u.rate = 1; u.pitch = 1;
+        if (i === chunks.length - 1) u.onend = fin;
+        u.onerror = fin; keep.push(u); speechSynthesis.speak(u);
+      });
+    });
   }
 
-  // ---- speech in
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  // ---------- voice in ----------
   function listen() {
-    if (!SR || !sess || sess.ended) return;
-    rec = new SR(); rec.lang = lang === 'hi' ? 'hi-IN' : 'en-IN'; rec.interimResults = true; rec.maxAlternatives = 1;
-    let final = '';
-    rec.onresult = e => { let interim = ''; for (const r of e.results) { if (r.isFinal) final = r[0].transcript; else interim += r[0].transcript; } status('🎤 ' + (final || interim)); };
-    rec.onerror = e => { status(e.error === 'not-allowed' ? 'Mic blocked: allow microphone access, or type instead.' : 'Didn\'t hear that; tap 🎤 or type.'); if (e.error === 'not-allowed') setHandsFree(false); };
-    rec.onend = () => { listening = false; $('mic').classList.toggle('on', handsFree); if (final.trim()) reply(final.trim()); else if (handsFree && sess && !sess.ended) setTimeout(listen, 300); };
-    try { rec.start(); listening = true; status('🎤 Listening… speak now'); } catch (e) { /* already started */ }
+    if (!sess || sess.ended || typedMode) return;
+    const my = ++recToken; let fin = '', interim = '', endT = null, committed = false;
+    const r = new SR(); rec = r;
+    r.lang = 'hi-IN'; r.continuous = true; r.interimResults = true; r.maxAlternatives = 1;
+    const commit = () => {
+      if (committed || my !== recToken) return; committed = true; clearTimeout(endT);
+      try { r.stop(); } catch (e) {}
+      const t = (fin + ' ' + interim).trim();
+      if (t) onCaller(t); else setTimeout(() => { if (my === recToken) listen(); }, 250);
+    };
+    r.onresult = e => {
+      if (my !== recToken) return;
+      fin = ''; interim = '';
+      for (let i = 0; i < e.results.length; i++) { const x = e.results[i]; if (x.isFinal) fin += x[0].transcript + ' '; else interim += x[0].transcript; }
+      clearTimeout(silenceTimer); clearTimeout(endT);
+      endT = setTimeout(commit, 1000); // caller paused ~1s: treat the sentence as finished
+      status('“' + (fin + interim).trim() + '”', true);
+    };
+    r.onerror = e => {
+      if (my !== recToken) return;
+      if (['not-allowed', 'service-not-allowed', 'audio-capture', 'network'].includes(e.error)) { committed = true; useTyping('Microphone or speech service unavailable. Type your reply instead.'); }
+    };
+    r.onend = () => { if (my === recToken && !committed) commit(); };
+    try { r.start(); mode('listening'); } catch (e) {}
   }
-  function setHandsFree(on) { handsFree = on; $('mic').classList.toggle('on', on); if (!on && rec) { try { rec.abort(); } catch (e) {} status(''); } }
-  $('mic').onclick = () => {
-    if (!SR) { status('Voice input needs Chrome or Edge. Typing works everywhere.'); return; }
-    setHandsFree(!handsFree); if (handsFree) { speechSynthesis && speechSynthesis.cancel(); listen(); }
-  };
+  function stopListening() { recToken++; clearTimeout(silenceTimer); if (rec) { try { rec.abort(); } catch (e) {} rec = null; } }
 
-  // ---- UI
-  const status = t => { $('status').textContent = t; };
-  function bubble(who, text) {
-    const d = document.createElement('div'); d.className = 'msg ' + (who === 'AIVA' ? 'aiva' : 'caller');
-    d.innerHTML = '<span class="who">' + (who === 'AIVA' ? 'AIVA (AI)' : 'You') + '</span>';
-    d.appendChild(document.createTextNode(text)); $('chat').appendChild(d); $('chat').scrollTop = 1e6;
+  function startTurn() {
+    if (!sess) return;
+    if (sess.ended) return finish();
+    if (typedMode) { mode(''); $('txt').focus(); return; }
+    listen();
+    clearTimeout(silenceTimer);
+    silenceTimer = setTimeout(onSilence, 9000);
   }
-  function persist() { if (sess) { const l = sess.toLead(); l.live = !sess.ended; Store.upsert(l); } }
-  function afterAiva(text) {
-    bubble('AIVA', text); persist();
-    if (sess.ended) { speak(text); finish(); return; }
-    speak(text, () => { status(handsFree ? '' : 'Tap 🎤 to speak, or type.'); if (handsFree) listen(); });
+  async function onSilence() {
+    if (!sess || sess.ended) return;
+    stopListening(); nudges++;
+    const hi = sess.lang === 'hi';
+    if (nudges === 1) {
+      const q = hi ? 'हेलो? क्या आप लाइन पर हैं?' : 'Hello? Are you still there?';
+      sess.transcript.push({ who: 'AIVA', text: q }); await speak(q); startTurn();
+    } else {
+      const q = hi ? 'लगता है कॉल कट गई है। HappySmile को कॉल करने के लिए धन्यवाद।' : "Looks like we got disconnected. Thank you for calling HappySmile.";
+      sess.transcript.push({ who: 'AIVA', text: q }); sess.hangup(); await speak(q); finish();
+    }
   }
-  function reply(text) {
+
+  async function onCaller(text) {
     if (!sess || sess.ended || !text) return;
-    bubble('caller', text); afterAiva(sess.handle(text));
+    stopListening(); nudges = 0;
+    status('“' + text + '”', true);
+    const reply = sess.handle(text);
+    persist();
+    await speak(reply);
+    startTurn();
   }
 
-  $('talkBtn').onclick = () => {
-    if (sess && !sess.ended) return;
-    sess = AIVA.createSession({ lang, treatment: $('treatment').value || null, source: $('source').value });
-    $('idle').hidden = true; $('chat').hidden = false; $('ctrl').hidden = false; $('chat').innerHTML = ''; $('altMsg').innerHTML = '';
-    const t0 = Date.now(); clearInterval(timer);
-    timer = setInterval(() => { const s = Math.round((Date.now() - t0) / 1000); $('phMeta').innerHTML = 'AI assistant · <span class="rec">● Recording</span> · ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }, 500);
-    afterAiva(sess.start());
-    $('txt').focus();
-  };
-  $('send').onclick = () => { const v = $('txt').value.trim(); $('txt').value = ''; reply(v); };
-  $('txt').onkeydown = e => { if (e.key === 'Enter') $('send').onclick(); };
-  $('endBtn').onclick = () => { if (!sess || sess.ended) return; sess.hangup(); bubble('AIVA', '(Caller hung up)'); persist(); speechSynthesis && speechSynthesis.cancel(); finish(); };
-
+  // ---------- call control ----------
+  async function startCall() {
+    status('Connecting…');
+    if (!TEST && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try { const s = await navigator.mediaDevices.getUserMedia({ audio: true }); s.getTracks().forEach(t => t.stop()); } catch (e) { /* recognition will report it */ }
+    }
+    if (TEST || !SR) useTyping(TEST ? '' : 'Voice input needs Edge or Chrome. Type your reply instead.');
+    await voicesReady();
+    sess = AIVA.createSession({ source: 'Phone call' });
+    t0 = Date.now(); nudges = 0;
+    $('call').classList.add('live');
+    clearInterval(tick); tick = setInterval(updateLabel, 500); updateLabel();
+    const greet = sess.start(); persist(); status('');
+    await speak(greet);
+    startTurn();
+  }
+  function hangUp() {
+    if (!sess || sess.ended) return;
+    stopListening(); if (hasTTS) speechSynthesis.cancel();
+    sess.hangup(); finish();
+  }
   function finish() {
-    clearInterval(timer); setHandsFree(false); $('ctrl').hidden = true;
+    stopListening(); clearInterval(tick);
+    $('call').classList.remove('live', 'speaking', 'listening'); $('label').textContent = 'Call HappySmile';
+    $('typed').hidden = true;
+    if (!sess) return;
     const L = sess.toLead(); L.live = false; Store.upsert(L);
-    $('phMeta').textContent = 'Call ended · ' + L.durationSec + 's';
-    const pill = L.outcome === 'booked' ? '<span class="pill okp">Booked</span>' : L.priority ? '<span class="pill ' + L.priority.toLowerCase() + '">' + L.priority + ' handoff</span>' : '<span class="pill mutep">' + L.outcome + '</span>';
-    const c = document.createElement('div'); c.className = 'endcard';
-    c.innerHTML = '<div style="margin-bottom:6px">' + pill + (L.confidence !== null ? ' <span class="pill mutep">confidence ' + L.confidence + '%</span>' : '') + '</div>' +
-      '<div style="color:#d0d5dd"></div><div style="margin-top:8px"><a href="dashboard.html" style="color:#5fe9d0">→ See what the front desk sees</a> · <a href="#" id="again" style="color:#5fe9d0">New call</a></div>';
-    c.children[1].textContent = L.summary; $('chat').appendChild(c); $('chat').scrollTop = 1e6;
-    $('again').onclick = e => { e.preventDefault(); sess = null; $('chat').hidden = true; $('idle').hidden = false; $('phMeta').textContent = 'Not connected'; status(''); };
-    status('');
+    const dur = fmt(L.durationSec);
+    const what = L.booked ? `Booked: ${L.treatment}, ${L.clinic}, ${L.slot}` : L.priority ? 'Our team will call you back' : '';
+    status('Call ended · ' + dur + (what ? ' · ' + what : ''));
   }
+  const fmt = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  function updateLabel() { $('label').textContent = 'End call · ' + fmt(Math.round((Date.now() - t0) / 1000)); }
+  function persist() { if (sess) { const l = sess.toLead(); l.live = !sess.ended; Store.upsert(l); } }
+  function mode(m) {
+    $('call').classList.toggle('speaking', m === 'speaking');
+    $('call').classList.toggle('listening', m === 'listening');
+    if (m === 'listening') status('Listening…');
+  }
+  function status(t) { $('status').textContent = t; }
+  function useTyping(msg) { typedMode = true; $('typed').hidden = false; if (msg) status(msg); $('txt').focus(); }
 
-  function quickLead(kind, msg) {
-    const tk = $('treatment').value || null;
-    const m = AIVA.HANDOFF_META[kind === 'pain' ? 'P0' : 'human'];
-    Store.upsert({ id: 'L' + Date.now().toString(36), time: Date.now(), lang: lang === 'hi' ? 'Hindi' : 'English', source: $('source').value,
-      treatment: tk ? AIVA.DB.treatments[tk].en : 'not stated', clinic: null, slot: null, name: null, outcome: 'handoff',
-      priority: m.priority, reason: kind === 'pain' ? 'Self-reported pain/swelling at enquiry (skipped AIVA)' : 'Chose a human callback at enquiry (skipped AIVA)',
-      next: m.next, confidence: null, booked: false, durationSec: 0, earlyDrop: false, endedAfterSlots: false, skippedAiva: true,
-      summary: (kind === 'pain' ? 'Tapped "In pain or swelling" on the enquiry page.' : 'Prefers to speak to a person.') + ' No AI call made.', transcript: [], live: false });
-    $('altMsg').innerHTML = '<div class="okmsg">' + msg + ' <a href="dashboard.html">See it on the front-desk screen →</a></div>';
-  }
-  $('painBtn').onclick = () => quickLead('pain', 'Flagged urgent. A HappySmile team member will call you within 15 minutes.');
-  $('humanBtn').onclick = () => quickLead('human', 'Done. A team member will call you today (9 AM–8 PM).');
+  $('call').onclick = () => { if (sess && !sess.ended) hangUp(); else { typedMode = false; startCall(); } };
+  $('send').onclick = () => { const v = $('txt').value.trim(); $('txt').value = ''; if (v) onCaller(v); };
+  $('txt').onkeydown = e => { if (e.key === 'Enter') $('send').onclick(); };
 })();

@@ -61,7 +61,7 @@
       `<div class="kpi"><div class="l">★ Success metric: enquiries → booked appointment</div><div class="v">${conv}%</div>
         <div class="d" style="color:${conv >= BASELINE ? 'var(--ok)' : 'var(--p0)'}">${conv >= BASELINE ? '▲' : '▼'} vs ${BASELINE}% pre-AIVA baseline · ${booked} of ${n} enquiries</div>
         <div class="d" style="color:var(--mute)">Includes bookings made by staff after a handoff, once marked.</div></div>
-      <div class="kpi ${earlyP >= 40 ? 'alert' : ''}"><div class="l">Early drop-off (hung up &lt;30s or before OK)</div><div class="v">${earlyP}%</div>
+      <div class="kpi ${earlyP >= 40 ? 'alert' : ''}"><div class="l">Early drop-off (hung up within 30s, before booking)</div><div class="v">${earlyP}%</div>
         <div class="d" style="color:${earlyP >= 40 ? 'var(--p0)' : 'var(--mute)'}">${earlyP >= 40 ? '⚠ Over 40% tripwire: staff call these leads and ask why' : 'Tripwire at 40% (pilot week 1)'} · ${early} of ${calls.length} calls</div></div>
       <div class="kpi"><div class="l">Hung up after hearing slots</div><div class="v">${slotsP}%</div>
         <div class="d" style="color:var(--mute)">${afterSlots} calls · decides whether SMS/WhatsApp follow-up is worth building (not in v1)</div></div>
