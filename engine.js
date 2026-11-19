@@ -6,16 +6,16 @@
     clinics: {
       indiranagar: { en: 'Indiranagar', hi: 'इंदिरानगर', address: '100 Feet Road, Indiranagar',
         slots: [
-          { en: 'Saturday 11 AM', hi: 'शनिवार सुबह 11 बजे', h: '11', w: ['eleven', 'ग्यारह', 'gyarah'], d: 'sat' },
-          { en: 'Saturday 4 PM', hi: 'शनिवार शाम 4 बजे', h: '4', w: ['four', 'चार', 'char'], d: 'sat' }] },
+          { en: 'Saturday at 11 AM', hi: 'शनिवार सुबह 11 बजे', h: '11', w: ['eleven', 'ग्यारह', 'gyarah'], d: 'sat' },
+          { en: 'Saturday at 4 PM', hi: 'शनिवार शाम 4 बजे', h: '4', w: ['four', 'चार', 'char'], d: 'sat' }] },
       koramangala: { en: 'Koramangala', hi: 'कोरमंगला', address: '80 Feet Road, Koramangala 4th Block',
         slots: [
-          { en: 'Friday 6 PM', hi: 'शुक्रवार शाम 6 बजे', h: '6', w: ['six', 'छह', 'छः', 'chhe', 'chhah'], d: 'fri' },
-          { en: 'Saturday 10 AM', hi: 'शनिवार सुबह 10 बजे', h: '10', w: ['ten', 'दस', 'das'], d: 'sat' }] },
+          { en: 'Friday at 6 PM', hi: 'शुक्रवार शाम 6 बजे', h: '6', w: ['six', 'छह', 'छः', 'chhe', 'chhah'], d: 'fri' },
+          { en: 'Saturday at 10 AM', hi: 'शनिवार सुबह 10 बजे', h: '10', w: ['ten', 'दस', 'das'], d: 'sat' }] },
       whitefield: { en: 'Whitefield', hi: 'व्हाइटफ़ील्ड', address: 'ITPL Main Road, Whitefield',
         slots: [
-          { en: 'Thursday 5 PM', hi: 'गुरुवार शाम 5 बजे', h: '5', w: ['five', 'पांच', 'पाँच', 'paanch', 'panch'], d: 'thu' },
-          { en: 'Saturday 12 noon', hi: 'शनिवार दोपहर 12 बजे', h: '12', w: ['twelve', 'noon', 'बारह', 'barah', 'दोपहर'], d: 'sat' }] }
+          { en: 'Thursday at 5 PM', hi: 'गुरुवार शाम 5 बजे', h: '5', w: ['five', 'पांच', 'पाँच', 'paanch', 'panch'], d: 'thu' },
+          { en: 'Saturday at 12 noon', hi: 'शनिवार दोपहर 12 बजे', h: '12', w: ['twelve', 'noon', 'बारह', 'barah', 'दोपहर'], d: 'sat' }] }
     },
     treatments: {
       braces: { en: 'braces', hi: 'ब्रेसेस', price: '₹35,000–90,000' },
@@ -101,42 +101,42 @@
       hi: 'HappySmile की AI असिस्टेंट में आपका स्वागत है। यह कॉल रिकॉर्ड हो रही है। आप मुझसे हिंदी या इंग्लिश में बात कर सकते हैं। बताइए, मैं आपकी क्या मदद करूँ?'
     },
     openHelp: {
-      en: 'Sure. Is this for braces, whitening, an implant, a cleaning, a root canal, or a general check-up?',
+      en: "Sure, happy to help! What's it for? Braces, whitening, an implant, a cleaning, a root canal, or just a check-up?",
       hi: 'ज़रूर। ब्रेसेस, व्हाइटनिंग, इम्प्लांट, सफ़ाई, रूट कैनाल, या जनरल चेक-अप, किसके लिए?'
     },
     askTreatment: {
-      en: 'Which treatment are you interested in: braces, whitening, implants, cleaning, root canal, or a general check-up?',
+      en: "What would you like to come in for? Braces, whitening, an implant, a cleaning, a root canal, or just a check-up?",
       hi: 'आप किस ट्रीटमेंट के बारे में जानना चाहते हैं: ब्रेसेस, व्हाइटनिंग, इम्प्लांट, सफ़ाई, रूट कैनाल, या जनरल चेक-अप?'
     },
-    gotTreatment: { en: tr => `Sure, ${tr}.`, hi: tr => `ठीक है, ${tr}।` },
+    gotTreatment: { en: tr => `Okay, ${tr}.`, hi: tr => `ठीक है, ${tr}।` },
     askClinic: {
-      en: 'Which clinic suits you: Indiranagar, Koramangala or Whitefield?',
+      en: "Which clinic is easiest for you? We're in Indiranagar, Koramangala and Whitefield.",
       hi: 'आपके लिए कौन सा क्लिनिक ठीक रहेगा: इंदिरानगर, कोरमंगला या व्हाइटफ़ील्ड?'
     },
     offerSlots: {
-      en: (c, a, b) => `At ${c}, I have ${a} or ${b} free for a consultation. Which works for you?`,
+      en: (c, a, b) => `At ${c}, I can do ${a}, or ${b}. Which one works better for you?`,
       hi: (c, a, b) => `${c} में ${a} या ${b} का स्लॉट खाली है। आपके लिए कौन सा ठीक है?`
     },
-    askName: { en: 'Great. May I have your name for the booking?', hi: 'बढ़िया। बुकिंग के लिए आपका नाम बता दीजिए?' },
+    askName: { en: 'Perfect. And what name should I put the booking under?', hi: 'बढ़िया। बुकिंग के लिए आपका नाम बता दीजिए?' },
     booked: {
-      en: (n, tr, c, s) => `Done, ${n}. Your ${tr} consultation is booked at HappySmile ${c} on ${s}. The consultation fee is ₹300, adjusted against treatment, and our team can see your booking right away.`,
+      en: (n, tr, c, s) => `All done, ${n}! You're booked for a ${tr} consultation at our ${c} clinic, on ${s}. The consultation is ₹300, and that's adjusted against your treatment.`,
       hi: (n, tr, c, s) => `हो गया, ${n} जी। आपका ${tr} कंसल्टेशन HappySmile ${c} में ${s} बुक हो गया है। कंसल्टेशन फ़ीस ₹300 है, जो ट्रीटमेंट में एडजस्ट हो जाती है।`
     },
     lowConf: {
-      en: ' Our team will also give you a quick call to double-check the details.',
+      en: ' Someone from our team will give you a quick call to confirm the details.',
       hi: ' हमारी टीम डिटेल्स कन्फ़र्म करने के लिए आपको एक छोटी सी कॉल भी करेगी।'
     },
-    anythingElse: { en: 'Anything else I can help with?', hi: 'और कुछ मदद कर सकती हूँ?' },
-    bye: { en: 'Thank you for calling HappySmile. Have a great day!', hi: 'HappySmile को कॉल करने के लिए धन्यवाद। आपका दिन शुभ हो!' },
-    sorry: { en: "Sorry, I didn't catch that. ", hi: 'माफ़ कीजिए, मैं समझ नहीं पाई। ' },
+    anythingElse: { en: 'Is there anything else I can help you with?', hi: 'और कुछ मदद कर सकती हूँ?' },
+    bye: { en: 'Thanks for calling HappySmile. Take care!', hi: 'HappySmile को कॉल करने के लिए धन्यवाद। अपना ख़्याल रखिए!' },
+    sorry: { en: "Sorry, I didn't quite get that. ", hi: 'माफ़ कीजिए, मैं समझ नहीं पाई। ' },
     cancelAsk: { en: 'Sure. What name is the booking under?', hi: 'ज़रूर। बुकिंग किस नाम से है?' },
     cancelled: {
-      en: n => `Done. The booking under ${n} is cancelled. Would you like to book a new slot instead?`,
+      en: n => `Done. I've cancelled the booking under ${n}. Would you like to pick a new slot instead?`,
       hi: n => `हो गया। ${n} के नाम की बुकिंग कैंसल कर दी है। क्या आप नया स्लॉट बुक करना चाहेंगे?`
     },
-    hours: { en: 'All our clinics are open 9 AM to 8 PM, Monday to Saturday.', hi: 'हमारे सभी क्लिनिक सोमवार से शनिवार, सुबह 9 से रात 8 बजे तक खुले रहते हैं।' },
+    hours: { en: "All our clinics are open from 9 in the morning to 8 at night, Monday to Saturday.", hi: 'हमारे सभी क्लिनिक सोमवार से शनिवार, सुबह 9 से रात 8 बजे तक खुले रहते हैं।' },
     priceOne: {
-      en: (tr, p) => `${tr} usually costs ${p}. The exact price is decided after the dentist's check-up. The consultation is ₹300, adjusted against treatment.`,
+      en: (tr, p) => `For ${tr.toLowerCase()}, it's usually ${p}. The dentist will confirm the exact price after a check-up, and the consultation itself is just ₹300.`,
       hi: (tr, p) => `${tr} का खर्च आमतौर पर ${p} होता है। सही कीमत डॉक्टर की जाँच के बाद तय होती है। कंसल्टेशन ₹300 है, जो ट्रीटमेंट में एडजस्ट हो जाता है।`
     },
     priceAll: {
@@ -148,34 +148,34 @@
       en: 'We have clinics in Indiranagar on 100 Feet Road, Koramangala on 80 Feet Road, and Whitefield on ITPL Main Road.',
       hi: 'हमारे क्लिनिक इंदिरानगर (100 फ़ीट रोड), कोरमंगला (80 फ़ीट रोड) और व्हाइटफ़ील्ड (ITPL मेन रोड) में हैं।'
     },
-    bookNudge: { en: 'Shall I book a consultation for you? ', hi: 'क्या मैं आपके लिए कंसल्टेशन बुक कर दूँ? ' },
+    bookNudge: { en: 'Would you like me to book a consultation? ', hi: 'क्या मैं आपके लिए कंसल्टेशन बुक कर दूँ? ' },
     handoff: {
       P0: {
-        en: "That sounds like it needs attention soon, so I won't just book a slot. I'm flagging this as urgent and our clinic team will call you back within 15 minutes. If you have severe swelling or trouble breathing or swallowing, please go to the nearest emergency room.",
+        en: "Oh, I'm sorry to hear that. Since this sounds urgent, I've flagged it for our clinic team, and they'll call you within 15 minutes. If the swelling gets severe, or you have trouble breathing or swallowing, please go to the nearest emergency room right away.",
         hi: 'यह जल्दी देखने वाली बात लगती है, इसलिए मैं सिर्फ़ स्लॉट बुक नहीं करूँगी। मैंने इसे अर्जेंट मार्क कर दिया है, हमारी टीम 15 मिनट में आपको कॉल करेगी। अगर सूजन बहुत ज़्यादा है या साँस लेने या निगलने में दिक्कत है, तो तुरंत नज़दीकी इमरजेंसी में जाएँ।'
       },
       medical: {
-        en: "That's a question for our dentist, and I can't give medical advice. I've passed it to our team with your details, and someone will call you back today.",
+        en: "That's a really good question, but it's one for our dentist, since I can't give medical advice. I've passed it on, and someone from our team will call you back today.",
         hi: 'यह सवाल हमारे डॉक्टर के लिए है, मैं मेडिकल सलाह नहीं दे सकती। मैंने आपकी डिटेल्स टीम को भेज दी हैं, आज ही कोई आपको कॉल करेगा।'
       },
       negotiate: {
-        en: "Our team can explain EMI and payment options properly. I've passed on your request, and someone will call you back today.",
+        en: "Our team can walk you through EMI and payment options properly. I've passed on your request, and they'll call you back today.",
         hi: 'EMI और पेमेंट के विकल्प हमारी टीम अच्छे से समझा पाएगी। मैंने आपकी रिक्वेस्ट भेज दी है, आज ही कोई आपको कॉल करेगा।'
       },
       human: {
-        en: "Of course. I've asked a team member to call you back shortly, and I've shared our conversation so you won't need to repeat yourself.",
+        en: "Of course. I've asked our front desk to call you back shortly, and I've shared our conversation, so you won't have to repeat yourself.",
         hi: 'ज़रूर। मैंने टीम से कहा है कि आपको जल्दी कॉल करें, और हमारी बातचीत भी शेयर कर दी है ताकि आपको दोबारा बताना न पड़े।'
       },
       confused: {
-        en: "I'm sorry, I'm having trouble understanding. I'll ask a team member to call you back shortly.",
-        hi: 'माफ़ कीजिए, मुझे समझने में दिक्कत हो रही है। मैं टीम से कहूँगी कि आपको जल्दी कॉल करें।'
+        en: "I'm sorry, I'm having trouble understanding you. Our front desk will get back in touch with you soon.",
+        hi: 'माफ़ कीजिए, मुझे समझने में दिक्कत हो रही है। हमारी फ्रंट डेस्क टीम जल्द ही आपसे संपर्क करेगी।'
       },
       noConsent: {
-        en: "No problem, I won't continue this call. A team member will call you back shortly.",
+        en: "No problem at all. I'll stop here, and our front desk will call you back shortly.",
         hi: 'कोई बात नहीं, मैं यह कॉल आगे नहीं बढ़ाऊँगी। हमारी टीम का कोई सदस्य आपको जल्दी कॉल करेगा।'
       },
       otherSlot: {
-        en: "Got it. I'll ask our team to call you with more options at that clinic.",
+        en: "Got it. I'll ask our front desk to call you with more options at that clinic.",
         hi: 'समझ गई। मैं टीम से कहूँगी कि उस क्लिनिक के और स्लॉट के लिए आपको कॉल करें।'
       }
     }
@@ -224,8 +224,8 @@
       return say(T.handoff[kind][lang] + ' ' + t('bye'));
     }
     function miss(retryPrompt) {
-      s.misses++; s.confidence = Math.max(0, s.confidence - 0.2);
-      if (s.misses >= 3) return handoff('confused');
+      s.misses++; s.streak = (s.streak || 0) + 1; s.confidence = Math.max(0, s.confidence - 0.2);
+      if (s.streak >= 2 || s.misses >= 3) return handoff('confused');
       return say(t('sorry') + retryPrompt);
     }
 
@@ -274,6 +274,11 @@
     s.start = function () { return say(t('greet')); };
 
     s.handle = function (raw) {
+      const before = s.misses, r = handleTurn(raw);
+      if (s.misses === before) s.streak = 0;
+      return r;
+    };
+    function handleTurn(raw) {
       if (s.ended) return '';
       const x = ' ' + String(raw || '').toLowerCase().replace(/[.,!?।]/g, ' ').trim() + ' ';
       const dl = detectLang(raw); if (dl) { lang = dl; s.lang = dl; }
@@ -345,6 +350,7 @@
         if (!ck) {
           const tk = findKey(stripClinics(x), KW.treatment);
           if (tk) { s.treatment = tk; return say(t('gotTreatment', trName(tk)) + ' ' + t('askClinic')); }
+          if (!s.clinicNudged && (has(x, KW.book) || has(x, KW.yes))) { s.clinicNudged = true; return say(t('askClinic')); }
           return miss(t('askClinic'));
         }
         s.clinic = ck; return say(goto('slot'));
