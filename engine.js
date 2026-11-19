@@ -1,0 +1,377 @@
+// AIVA conversation engine: deterministic, rule-based prototype.
+// Production would swap keyword matching for an LLM + Indic speech models,
+// keeping the same guardrails (disclosure, consent, DB-only answers, escalation).
+(function (root) {
+  const DB = {
+    clinics: {
+      indiranagar: { en: 'Indiranagar', hi: 'इंदिरानगर', address: '100 Feet Road, Indiranagar',
+        slots: [
+          { en: 'Saturday 11 AM', hi: 'शनिवार सुबह 11 बजे', h: '11', w: ['eleven', 'ग्यारह', 'gyarah'], d: 'sat' },
+          { en: 'Saturday 4 PM', hi: 'शनिवार शाम 4 बजे', h: '4', w: ['four', 'चार', 'char'], d: 'sat' }] },
+      koramangala: { en: 'Koramangala', hi: 'कोरमंगला', address: '80 Feet Road, Koramangala 4th Block',
+        slots: [
+          { en: 'Friday 6 PM', hi: 'शुक्रवार शाम 6 बजे', h: '6', w: ['six', 'छह', 'छः', 'chhe', 'chhah'], d: 'fri' },
+          { en: 'Saturday 10 AM', hi: 'शनिवार सुबह 10 बजे', h: '10', w: ['ten', 'दस', 'das'], d: 'sat' }] },
+      whitefield: { en: 'Whitefield', hi: 'व्हाइटफ़ील्ड', address: 'ITPL Main Road, Whitefield',
+        slots: [
+          { en: 'Thursday 5 PM', hi: 'गुरुवार शाम 5 बजे', h: '5', w: ['five', 'पांच', 'पाँच', 'paanch', 'panch'], d: 'thu' },
+          { en: 'Saturday 12 noon', hi: 'शनिवार दोपहर 12 बजे', h: '12', w: ['twelve', 'noon', 'बारह', 'barah', 'दोपहर'], d: 'sat' }] }
+    },
+    treatments: {
+      braces: { en: 'braces', hi: 'ब्रेसेस', price: '₹35,000–90,000' },
+      whitening: { en: 'teeth whitening', hi: 'दाँतों की व्हाइटनिंग', price: '₹6,000–12,000' },
+      implant: { en: 'dental implant', hi: 'इम्प्लांट', price: '₹25,000–45,000 per tooth' },
+      cleaning: { en: 'cleaning', hi: 'सफ़ाई', price: '₹1,000–1,500' },
+      rct: { en: 'root canal (RCT)', hi: 'रूट कैनाल', price: '₹5,000–9,000' },
+      checkup: { en: 'general check-up', hi: 'जनरल चेक-अप', price: '₹300 consultation' }
+    }
+  };
+
+  const KW = {
+    clinic: {
+      indiranagar: ['indiranagar', 'indira nagar', 'indira', 'इंदिरा', 'इंदिरानगर'],
+      koramangala: ['koramangala', 'kormangala', 'kora', 'कोरमंगला', 'कोरमंगल'],
+      whitefield: ['whitefield', 'white field', 'itpl', 'व्हाइटफ़ील्ड', 'व्हाइटफील्ड', 'वाइटफील्ड']
+    },
+    treatment: {
+      braces: ['brace', 'aligner', 'crooked', 'straighten', 'ब्रेस', 'ब्रेसेस', 'टेढ़े', 'tedhe', 'clip', 'क्लिप'],
+      whitening: ['whiten', 'white', 'yellow', 'safed', 'सफ़ेद', 'सफेद', 'पीले', 'peele', 'व्हाइटनिंग', 'वाइटनिंग'],
+      implant: ['implant', 'missing tooth', 'missing teeth', 'इम्प्लांट', 'इंप्लांट', 'नकली दाँत', 'nakli'],
+      cleaning: ['clean', 'scaling', 'सफ़ाई', 'सफाई', 'safai', 'क्लीनिंग'],
+      rct: ['root canal', 'rct', 'रूट कैनाल', 'रूट', 'आरसीटी'],
+      checkup: ['check', 'consult', 'चेक', 'जाँच', 'जांच', 'janch']
+    },
+    urgentStrong: ['swell', 'swollen', 'bleed', 'blood', 'fever', 'abscess', 'pus', 'broken tooth', 'tooth broke', 'accident', 'emergency',
+      'sujan', 'soojan', 'सूजन', 'khoon', 'खून', 'bukhar', 'बुखार', 'टूट', 'इमरजेंसी', 'मवाद'],
+    painWords: ['pain', 'hurt', 'ache', 'dard', 'दर्द'],
+    questionWords: ['will ', 'does ', 'is it', 'is the', 'would ', '?', 'hoga', 'होगा', 'होता', 'kya ', 'क्या '],
+    medical: ['medicine', 'tablet', 'dawai', 'दवा', 'दवाई', 'eat', 'khana', 'खाना', 'safe', 'side effect', 'should i', 'infection',
+      'antibiotic', 'x-ray', 'xray', 'pregnan', 'diabet', 'sugar', 'normal hai', 'नॉर्मल', 'painful', 'dard hoga', 'दर्द होगा'],
+    negotiate: ['discount', 'cheaper', 'sasta', 'सस्ता', 'kam kar', 'कम कर', 'emi', 'ईएमआई', 'insurance', 'बीमा', 'offer', 'negotiat',
+      'installment', 'kist', 'किस्त'],
+    human: ['human', 'real person', 'a person', 'staff', 'receptionist', 'insaan', 'इंसान', 'kisi se baat', 'किसी से बात', 'manager',
+      'call me back', 'callback', 'असली'],
+    cancel: ['cancel', 'रद्द', 'radd', 'कैंसल'],
+    price: ['price', 'cost', 'charge', 'fee', 'kitna', 'कितना', 'kitne', 'कितने', 'rate', 'paise', 'पैसे', 'kharcha', 'खर्च', 'कीमत', 'keemat'],
+    hours: ['timing', 'open', 'hours', 'kab khul', 'कब खुल', 'khula', 'खुला', 'sunday', 'ravivar', 'रविवार'],
+    location: ['where', 'address', 'location', 'kahan', 'कहाँ', 'कहां', 'direction', 'पता'],
+    no: ["don't", 'dont', 'not ok', 'nope', 'nahi', 'nahin', 'नहीं', 'नही', 'mat ', 'मत', 'no'],
+    yes: ['yes', 'yeah', 'yup', 'sure', 'okay', 'ok', 'fine', 'haan', 'han', 'हाँ', 'हां', 'ठीक', 'theek', 'thik', 'bilkul', 'बिल्कुल',
+      'go ahead', 'chalega', 'चलेगा', 'ji', 'जी'],
+    first: ['first', 'one', 'pehla', 'pehle', 'पहला', 'पहले', 'एक', ' ek '],
+    second: ['second', 'two', 'doosra', 'dusra', 'दूसरा', 'दूसरे', ' do '],
+    otherSlot: ['none', 'neither', 'other', 'another', 'koi aur', 'कोई और', 'different', 'kuch aur', 'कुछ और'],
+    days: { sat: ['saturday', 'sat ', 'shani', 'शनि'], fri: ['friday', 'fri ', 'shukr', 'शुक्र'], thu: ['thursday', 'thu ', 'guru', 'गुरु'] }
+  };
+
+  // Short latin keywords match whole words only (so "ok" doesn't match "book").
+  const has = (t, list) => list.some(k => {
+    if (/^[a-z]+$/.test(k) && k.length <= 3) return new RegExp('(^|[^a-z])' + k + '([^a-z]|$)').test(t);
+    return t.includes(k);
+  });
+  const findKey = (t, map) => Object.keys(map).find(k => has(t, map[k]));
+  const stripClinics = t => Object.values(KW.clinic).flat().reduce((s, k) => s.split(k).join(' '), t);
+  const cap = x => x.charAt(0).toUpperCase() + x.slice(1);
+
+  function loadRules() {
+    try { return JSON.parse((root.localStorage && root.localStorage.getItem('aiva_rules')) || '{}'); } catch (e) { return {}; }
+  }
+
+  const T = {
+    greet: {
+      en: "Namaste! I'm AIVA, HappySmile Dental's AI assistant, not a human. I can book a consultation or answer questions on timings, locations and prices. This call is recorded so our team can follow up. Is that okay?",
+      hi: 'नमस्ते! मैं AIVA हूँ, HappySmile Dental की AI असिस्टेंट, इंसान नहीं। मैं आपका कंसल्टेशन बुक कर सकती हूँ, या टाइमिंग, लोकेशन और कीमत के बारे में बता सकती हूँ। यह कॉल रिकॉर्ड हो रही है ताकि हमारी टीम फ़ॉलो-अप कर सके। क्या यह ठीक है?'
+    },
+    askTreatment: {
+      en: 'Which treatment are you interested in: braces, whitening, implants, cleaning, root canal, or a general check-up?',
+      hi: 'आप किस ट्रीटमेंट के बारे में जानना चाहते हैं: ब्रेसेस, व्हाइटनिंग, इम्प्लांट, सफ़ाई, रूट कैनाल, या जनरल चेक-अप?'
+    },
+    gotTreatment: { en: tr => `Sure, ${tr}.`, hi: tr => `ठीक है, ${tr}।` },
+    askClinic: {
+      en: 'Which clinic suits you: Indiranagar, Koramangala or Whitefield?',
+      hi: 'आपके लिए कौन सा क्लिनिक ठीक रहेगा: इंदिरानगर, कोरमंगला या व्हाइटफ़ील्ड?'
+    },
+    offerSlots: {
+      en: (c, a, b) => `At ${c}, I have ${a} or ${b} free for a consultation. Which works for you?`,
+      hi: (c, a, b) => `${c} में ${a} या ${b} का स्लॉट खाली है। आपके लिए कौन सा ठीक है?`
+    },
+    askName: { en: 'Great. May I have your name for the booking?', hi: 'बढ़िया। बुकिंग के लिए आपका नाम बता दीजिए?' },
+    booked: {
+      en: (n, tr, c, s) => `Done, ${n}. Your ${tr} consultation is booked at HappySmile ${c} on ${s}. The consultation fee is ₹300, adjusted against treatment, and our team can see your booking right away.`,
+      hi: (n, tr, c, s) => `हो गया, ${n} जी। आपका ${tr} कंसल्टेशन HappySmile ${c} में ${s} बुक हो गया है। कंसल्टेशन फ़ीस ₹300 है, जो ट्रीटमेंट में एडजस्ट हो जाती है।`
+    },
+    lowConf: {
+      en: ' Our team will also give you a quick call to double-check the details.',
+      hi: ' हमारी टीम डिटेल्स कन्फ़र्म करने के लिए आपको एक छोटी सी कॉल भी करेगी।'
+    },
+    anythingElse: { en: 'Anything else I can help with?', hi: 'और कुछ मदद कर सकती हूँ?' },
+    bye: { en: 'Thank you for calling HappySmile. Have a great day!', hi: 'HappySmile को कॉल करने के लिए धन्यवाद। आपका दिन शुभ हो!' },
+    sorry: { en: "Sorry, I didn't catch that. ", hi: 'माफ़ कीजिए, मैं समझ नहीं पाई। ' },
+    cancelAsk: { en: 'Sure. What name is the booking under?', hi: 'ज़रूर। बुकिंग किस नाम से है?' },
+    cancelled: {
+      en: n => `Done. The booking under ${n} is cancelled. Would you like to book a new slot instead?`,
+      hi: n => `हो गया। ${n} के नाम की बुकिंग कैंसल कर दी है। क्या आप नया स्लॉट बुक करना चाहेंगे?`
+    },
+    hours: { en: 'All our clinics are open 9 AM to 8 PM, Monday to Saturday.', hi: 'हमारे सभी क्लिनिक सोमवार से शनिवार, सुबह 9 से रात 8 बजे तक खुले रहते हैं।' },
+    priceOne: {
+      en: (tr, p) => `${tr} usually costs ${p}. The exact price is decided after the dentist's check-up. The consultation is ₹300, adjusted against treatment.`,
+      hi: (tr, p) => `${tr} का खर्च आमतौर पर ${p} होता है। सही कीमत डॉक्टर की जाँच के बाद तय होती है। कंसल्टेशन ₹300 है, जो ट्रीटमेंट में एडजस्ट हो जाता है।`
+    },
+    priceAll: {
+      en: "It depends on the treatment. For example, cleaning is ₹1,000–1,500, whitening ₹6,000–12,000 and braces ₹35,000–90,000. The final price is decided after the dentist's check-up.",
+      hi: 'यह ट्रीटमेंट पर निर्भर करता है। जैसे सफ़ाई ₹1,000–1,500, व्हाइटनिंग ₹6,000–12,000 और ब्रेसेस ₹35,000–90,000। सही कीमत डॉक्टर की जाँच के बाद तय होती है।'
+    },
+    locOne: { en: (c, a) => `Our ${c} clinic is on ${a}.`, hi: (c, a) => `हमारा ${c} क्लिनिक ${a} पर है।` },
+    locAll: {
+      en: 'We have clinics in Indiranagar on 100 Feet Road, Koramangala on 80 Feet Road, and Whitefield on ITPL Main Road.',
+      hi: 'हमारे क्लिनिक इंदिरानगर (100 फ़ीट रोड), कोरमंगला (80 फ़ीट रोड) और व्हाइटफ़ील्ड (ITPL मेन रोड) में हैं।'
+    },
+    bookNudge: { en: 'Shall I book a consultation for you? ', hi: 'क्या मैं आपके लिए कंसल्टेशन बुक कर दूँ? ' },
+    handoff: {
+      P0: {
+        en: "That sounds like it needs attention soon, so I won't just book a slot. I'm flagging this as urgent and our clinic team will call you back within 15 minutes. If you have severe swelling or trouble breathing or swallowing, please go to the nearest emergency room.",
+        hi: 'यह जल्दी देखने वाली बात लगती है, इसलिए मैं सिर्फ़ स्लॉट बुक नहीं करूँगी। मैंने इसे अर्जेंट मार्क कर दिया है, हमारी टीम 15 मिनट में आपको कॉल करेगी। अगर सूजन बहुत ज़्यादा है या साँस लेने या निगलने में दिक्कत है, तो तुरंत नज़दीकी इमरजेंसी में जाएँ।'
+      },
+      medical: {
+        en: "That's a question for our dentist, and I can't give medical advice. I've passed it to our team with your details, and someone will call you back today.",
+        hi: 'यह सवाल हमारे डॉक्टर के लिए है, मैं मेडिकल सलाह नहीं दे सकती। मैंने आपकी डिटेल्स टीम को भेज दी हैं, आज ही कोई आपको कॉल करेगा।'
+      },
+      negotiate: {
+        en: "Our team can explain EMI and payment options properly. I've passed on your request, and someone will call you back today.",
+        hi: 'EMI और पेमेंट के विकल्प हमारी टीम अच्छे से समझा पाएगी। मैंने आपकी रिक्वेस्ट भेज दी है, आज ही कोई आपको कॉल करेगा।'
+      },
+      human: {
+        en: "Of course. I've asked a team member to call you back shortly, and I've shared our conversation so you won't need to repeat yourself.",
+        hi: 'ज़रूर। मैंने टीम से कहा है कि आपको जल्दी कॉल करें, और हमारी बातचीत भी शेयर कर दी है ताकि आपको दोबारा बताना न पड़े।'
+      },
+      confused: {
+        en: "I'm sorry, I'm having trouble understanding. I'll ask a team member to call you back shortly.",
+        hi: 'माफ़ कीजिए, मुझे समझने में दिक्कत हो रही है। मैं टीम से कहूँगी कि आपको जल्दी कॉल करें।'
+      },
+      noConsent: {
+        en: "No problem, I won't continue this call. A team member will call you back shortly.",
+        hi: 'कोई बात नहीं, मैं यह कॉल आगे नहीं बढ़ाऊँगी। हमारी टीम का कोई सदस्य आपको जल्दी कॉल करेगा।'
+      },
+      otherSlot: {
+        en: "Got it. I'll ask our team to call you with more options at that clinic.",
+        hi: 'समझ गई। मैं टीम से कहूँगी कि उस क्लिनिक के और स्लॉट के लिए आपको कॉल करें।'
+      }
+    }
+  };
+
+  const HANDOFF_META = {
+    P0: { priority: 'P0', reason: 'Urgent symptom reported', next: 'Call within 15 minutes; dentist to assess urgency.' },
+    medical: { priority: 'P1', reason: 'Clinical question (AIVA gives no medical advice)', next: 'Dentist or senior staff to answer, then offer a consultation.' },
+    negotiate: { priority: 'P1', reason: 'Price / EMI / insurance discussion', next: 'Explain EMI and payment options, then offer a slot.' },
+    human: { priority: 'P2', reason: 'Asked to speak to a person', next: 'Call back today; context below, no need to re-ask.' },
+    confused: { priority: 'P2', reason: 'AIVA could not understand the caller', next: 'Call back; check language preference.' },
+    noConsent: { priority: 'P2', reason: 'Declined the AI call / recording', next: 'Human callback; do not route this lead to AIVA.' },
+    otherSlot: { priority: 'P2', reason: 'Wanted a slot AIVA could not offer', next: 'Offer more slots at the preferred clinic.' }
+  };
+
+  function createSession(opts) {
+    opts = opts || {};
+    const lang = opts.lang === 'hi' ? 'hi' : 'en';
+    const rules = loadRules();
+    const extraUrgent = (rules.urgentExtra || '').split(',').map(v => v.trim().toLowerCase()).filter(Boolean);
+    const s = {
+      id: 'L' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+      lang, source: opts.source || 'Website enquiry', state: 'consent', consent: false,
+      treatment: opts.treatment || null, enquiredTreatment: opts.treatment || null,
+      clinic: null, slot: null, name: null, cancelledName: null, misses: 0, confidence: 1, slotsOffered: false,
+      outcome: null, handoff: null, transcript: [], startedAt: Date.now(), endedAt: null, lastUserQuote: '', ended: false
+    };
+    const say = txt => { s.transcript.push({ who: 'AIVA', text: txt }); return txt; };
+    const t = (key, ...a) => { const v = T[key][lang]; return typeof v === 'function' ? v(...a) : v; };
+    const trName = k => DB.treatments[k][lang];
+    const clName = k => DB.clinics[k][lang];
+
+    function promptFor(state) {
+      if (state === 'treatment') return t('askTreatment');
+      if (state === 'clinic') return t('askClinic');
+      if (state === 'slot') { const c = DB.clinics[s.clinic]; return t('offerSlots', clName(s.clinic), c.slots[0][lang], c.slots[1][lang]); }
+      if (state === 'name') return t('askName');
+      if (state === 'anything') return t('anythingElse');
+      return '';
+    }
+    function goto(state) { s.state = state; if (state === 'slot') s.slotsOffered = true; return promptFor(state); }
+    function end(outcome) { if (s.outcome !== 'booked') s.outcome = outcome; s.ended = true; s.endedAt = Date.now(); }
+    function handoff(kind) {
+      s.handoff = Object.assign({ kind }, HANDOFF_META[kind]);
+      end('handoff');
+      return say(T.handoff[kind][lang] + ' ' + t('bye'));
+    }
+    function miss(retryPrompt) {
+      s.misses++; s.confidence = Math.max(0, s.confidence - 0.2);
+      if (s.misses >= 3) return handoff('confused');
+      return say(t('sorry') + retryPrompt);
+    }
+
+    // Safety and info intents are checked at every step, before the booking flow.
+    function globalIntents(x) {
+      const isQuestion = has(x, KW.questionWords);
+      if (has(x, KW.urgentStrong) || extraUrgent.some(k => x.includes(k)) || (has(x, KW.painWords) && !isQuestion)) return handoff('P0');
+      if (has(x, KW.medical) || (has(x, KW.painWords) && isQuestion)) return handoff('medical');
+      if (has(x, KW.negotiate)) return handoff('negotiate');
+      if (has(x, KW.human)) return handoff('human');
+      if (has(x, KW.cancel)) { s.state = 'cancelName'; return say(t('cancelAsk')); }
+      const info = [];
+      if (has(x, KW.price)) {
+        const tk = findKey(stripClinics(x), KW.treatment) || s.treatment;
+        if (tk) { s.treatment = s.treatment || tk; info.push(t('priceOne', cap(trName(tk)), DB.treatments[tk].price)); } else info.push(t('priceAll'));
+      }
+      if (has(x, KW.hours) && s.state !== 'slot') info.push(t('hours'));
+      if (has(x, KW.location)) {
+        const ck = findKey(x, KW.clinic) || s.clinic;
+        info.push(ck ? t('locOne', clName(ck), DB.clinics[ck].address) : t('locAll'));
+      }
+      if (info.length) {
+        if (!s.outcome) s.outcome = 'info';
+        let next = s.state;
+        if (next === 'anything' || next === 'consent') {
+          if (s.outcome === 'booked') return say(info.join(' ') + ' ' + goto('anything'));
+          next = s.treatment ? 'clinic' : 'treatment';
+        }
+        if (next === 'treatment' && s.treatment) next = s.clinic ? 'slot' : 'clinic';
+        const nudge = (next === 'treatment' || next === 'clinic') ? t('bookNudge') : '';
+        return say(info.join(' ') + ' ' + nudge + goto(next));
+      }
+      return null;
+    }
+
+    function extractName(raw) {
+      let n = String(raw)
+        .replace(/\b(my name is|name is|i am|i'm|this is|it's|it is|mera naam|naam|hai|ji)\b/gi, ' ')
+        .replace(/मेरा नाम|नाम|है|जी|[.,!?।]/g, ' ')
+        .trim().replace(/\s+/g, ' ');
+      n = n.split(' ').slice(0, 3).join(' ');
+      return n ? n.split(' ').map(cap).join(' ') : '';
+    }
+
+    s.start = function () { return say(t('greet')); };
+
+    s.handle = function (raw) {
+      if (s.ended) return '';
+      const x = ' ' + String(raw || '').toLowerCase().trim() + ' ';
+      s.transcript.push({ who: 'Caller', text: String(raw) });
+      s.lastUserQuote = String(raw);
+
+      if (s.state === 'consent') {
+        if (has(x, KW.no) && !x.includes('no problem')) return handoff('noConsent');
+        if (has(x, KW.yes)) {
+          s.consent = true;
+          const g = globalIntents(x); if (g) return g;
+          if (s.treatment) return say(t('gotTreatment', trName(s.treatment)) + ' ' + goto('clinic'));
+          return say(goto('treatment'));
+        }
+        const g = globalIntents(x); if (g) { s.consent = true; return g; }
+        return miss(t('greet'));
+      }
+
+      if (s.state === 'cancelName') {
+        const n = extractName(raw);
+        if (!n) return miss(t('cancelAsk'));
+        s.cancelledName = n; if (s.outcome !== 'booked') s.outcome = 'cancelled'; s.state = 'rebook';
+        return say(t('cancelled', n));
+      }
+      if (s.state === 'rebook') {
+        if (has(x, KW.yes) && !has(x, KW.no)) return say(s.treatment ? goto('clinic') : goto('treatment'));
+        end('cancelled'); return say(t('bye'));
+      }
+
+      if (s.state === 'name') {
+        if (has(x, KW.urgentStrong) || has(x, KW.human)) return globalIntents(x);
+        const n = extractName(raw);
+        if (!n || n.length < 2) return miss(t('askName'));
+        s.name = n; s.outcome = 'booked'; s.state = 'anything';
+        const slot = DB.clinics[s.clinic].slots[s.slot];
+        let reply = t('booked', n, trName(s.treatment || 'checkup'), clName(s.clinic), slot[lang]);
+        if (s.confidence < 0.7) reply += t('lowConf');
+        return say(reply + ' ' + t('anythingElse'));
+      }
+
+      if (s.state === 'anything') {
+        const g = globalIntents(x); if (g) return g;
+        if (has(x, KW.no) || has(x, ['thank', 'dhanyavad', 'धन्यवाद', 'shukriya', 'शुक्रिया', 'bas', 'बस', "that's all"])) {
+          end(s.outcome || 'info'); return say(t('bye'));
+        }
+        const tk = findKey(stripClinics(x), KW.treatment);
+        if (tk || has(x, ['book', 'appointment', 'बुक', 'अपॉइंटमेंट'])) { if (tk) s.treatment = tk; return say(s.treatment ? goto('clinic') : goto('treatment')); }
+        return miss(t('anythingElse'));
+      }
+
+      const g = globalIntents(x); if (g) return g;
+
+      if (s.state === 'treatment') {
+        const tk = findKey(stripClinics(x), KW.treatment);
+        const ck = findKey(x, KW.clinic);
+        if (!tk) { if (ck) s.clinic = ck; return miss(t('askTreatment')); }
+        s.treatment = tk;
+        if (ck || s.clinic) { s.clinic = ck || s.clinic; return say(t('gotTreatment', trName(tk)) + ' ' + goto('slot')); }
+        return say(t('gotTreatment', trName(tk)) + ' ' + goto('clinic'));
+      }
+
+      if (s.state === 'clinic') {
+        const ck = findKey(x, KW.clinic);
+        if (!ck) {
+          const tk = findKey(stripClinics(x), KW.treatment);
+          if (tk) { s.treatment = tk; return say(t('gotTreatment', trName(tk)) + ' ' + t('askClinic')); }
+          return miss(t('askClinic'));
+        }
+        s.clinic = ck; return say(goto('slot'));
+      }
+
+      if (s.state === 'slot') {
+        if (has(x, KW.otherSlot)) return handoff('otherSlot');
+        const slots = DB.clinics[s.clinic].slots;
+        let pick = null;
+        slots.forEach((sl, i) => { if (new RegExp('(^|[^0-9])' + sl.h + '([^0-9]|$)').test(x) || has(x, sl.w)) pick = i; });
+        if (pick === null && has(x, KW.first)) pick = 0;
+        if (pick === null && has(x, KW.second)) pick = 1;
+        if (pick === null) {
+          const byDay = slots.map((sl, i) => has(x, KW.days[sl.d]) ? i : -1).filter(i => i >= 0);
+          if (byDay.length === 1) pick = byDay[0];
+          else if (byDay.length > 1 || (has(x, KW.yes) && !has(x, KW.no))) { pick = 0; s.confidence -= 0.35; } // ambiguous: guess, flag for staff
+        }
+        if (pick === null) return miss(promptFor('slot'));
+        s.slot = pick; return say(goto('name'));
+      }
+      return miss('');
+    };
+
+    s.hangup = function () {
+      if (s.ended) return;
+      s.ended = true; s.endedAt = Date.now();
+      if (!s.outcome) s.outcome = 'dropped';
+    };
+
+    s.toLead = function () {
+      const dur = Math.round(((s.endedAt || Date.now()) - s.startedAt) / 1000);
+      const tk = s.treatment || s.enquiredTreatment;
+      const tr = tk ? DB.treatments[tk].en : 'not stated';
+      const cl = s.clinic ? DB.clinics[s.clinic].en : null;
+      const sl = s.clinic && s.slot !== null ? DB.clinics[s.clinic].slots[s.slot].en : null;
+      const langName = s.lang === 'hi' ? 'Hindi' : 'English';
+      let summary;
+      if (s.outcome === 'booked') summary = `Booked ${tr} consultation at ${cl}, ${sl}, for ${s.name}. Spoke ${langName}.` + (s.handoff ? ` Later flagged: ${s.handoff.reason}.` : '');
+      else if (s.outcome === 'handoff') summary = `${s.handoff.reason}. Interested in ${tr}${cl ? ' at ' + cl : ''}. Caller said: "${s.lastUserQuote}". Spoke ${langName}.`;
+      else if (s.outcome === 'cancelled') summary = `Cancelled the booking under ${s.cancelledName}; did not rebook. Spoke ${langName}.`;
+      else if (s.outcome === 'info') summary = `Asked for information only (${tr}); did not book. Spoke ${langName}.`;
+      else summary = s.slotsOffered ? `Hung up after hearing slot options${cl ? ' at ' + cl : ''} (${tr}).` : `Hung up after ${dur}s, ${s.consent ? 'after' : 'before'} agreeing to the AI call.`;
+      const priority = s.handoff ? s.handoff.priority : null;
+      return {
+        id: s.id, time: s.startedAt, lang: langName, source: s.source, treatment: tr, clinic: cl, slot: sl, name: s.name || s.cancelledName || null,
+        outcome: s.handoff && s.outcome === 'booked' ? 'handoff' : s.outcome, priority, reason: s.handoff ? s.handoff.reason : null,
+        next: s.handoff ? s.handoff.next : (s.outcome === 'dropped' || s.outcome === 'info' ? 'Optional follow-up: showed interest but did not book.' : null),
+        confidence: s.outcome === 'booked' ? Math.round(Math.max(0, s.confidence) * 100) : null,
+        booked: s.outcome === 'booked',
+        durationSec: dur, earlyDrop: s.outcome === 'dropped' && !s.slotsOffered && (dur < 30 || !s.consent),
+        endedAfterSlots: s.slotsOffered && s.outcome !== 'booked', summary, transcript: s.transcript, live: true
+      };
+    };
+    return s;
+  }
+
+  const api = { createSession, DB, HANDOFF_META };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.AIVA = api;
+})(typeof window !== 'undefined' ? window : globalThis);

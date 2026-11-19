@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AIVA · HappySmile – Screen 1: the enquiry moment</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="top">
+  <div class="logo">HappySmile <span>Dental</span></div>
+  <div class="nav"><a class="on" href="index.html">① Patient: enquiry moment</a><a href="dashboard.html">② Front desk: what HappySmile sees</a></div>
+</div>
+<div class="banner">Fictional demo for a product case. Clinics, prices and slots are made up. AIVA here is a rule-based prototype; production would use an LLM + Indic speech models with the same guardrails. Best in Chrome or Edge (voice); typing works everywhere.</div>
+
+<div class="wrap grid">
+  <div class="card">
+    <h1>Thanks! We've got your enquiry.</h1>
+    <p class="sub">This is what a person sees the moment they ask HappySmile to contact them (website form, Instagram/Google ad or listing site).</p>
+
+    <label>Enquiry about</label>
+    <select id="treatment">
+      <option value="braces">Braces</option><option value="whitening">Teeth whitening</option><option value="implant">Dental implant</option>
+      <option value="cleaning">Cleaning</option><option value="rct">Root canal</option><option value="">Not sure yet</option>
+    </select>
+    <label>Came from</label>
+    <select id="source"><option>Website enquiry</option><option>Instagram ad</option><option>Google ad</option><option>Listing site</option></select>
+
+    <label>Preferred language</label>
+    <div class="seg" id="langSeg"><button data-l="en" class="on">English / Hinglish</button><button data-l="hi">हिंदी</button></div>
+
+    <div style="margin-top:18px">
+      <button class="btn big" id="talkBtn">📞 Talk to AIVA now (no waiting)</button>
+      <div class="fine"><b>AIVA is HappySmile's AI assistant, not a person.</b> It can book a consultation, cancel a booking, and answer questions on timings, locations and prices. It doesn't give medical advice. The call is recorded to book your visit; AIVA will ask for your OK first. Available 9 AM–8 PM.</div>
+    </div>
+
+    <div class="alt">
+      <button class="btn red" id="painBtn">🦷 In pain or swelling? Our staff will call you</button>
+      <button class="btn ghost" id="humanBtn">🙋 Prefer a person? Request a callback</button>
+      <div id="altMsg"></div>
+    </div>
+
+    <details>
+      <summary>Demo script: things to try</summary>
+      <ul>
+        <li><b>Happy path:</b> "yes" → "braces" → "Koramangala" → "Friday 6 pm" → "Rahul"</li>
+        <li><b>Info then book:</b> "yes" → "how much is an implant?" → "Whitefield" → "the second one" → "Anil"</li>
+        <li><b>Urgent (P0):</b> "yes" → "my tooth is swollen and hurts" → AIVA <i>won't</i> book and flags urgent</li>
+        <li><b>Clinical (P1):</b> "is root canal painful?" → no medical advice, handed to staff</li>
+        <li><b>Price talk (P1):</b> "do you have EMI?" · <b>Human (P2):</b> "can I talk to a person"</li>
+        <li><b>No consent:</b> answer "no" to the first question</li>
+        <li><b>Cancellation:</b> "yes" → "I want to cancel my appointment" → "Sunita"</li>
+        <li><b>Hindi:</b> pick हिंदी → "हाँ" → "ब्रेसेस" → "इंदिरानगर" → "शनिवार चार बजे" → "मेरा नाम अमित है"</li>
+        <li><b>Drop-off:</b> start a call and press End call. It shows up as an early drop in the front-desk metrics.</li>
+      </ul>
+    </details>
+  </div>
+
+  <div class="phone">
+    <div class="ph-head">
+      <div class="avatar">AI</div>
+      <div style="flex:1"><div class="ph-name">AIVA · HappySmile AI assistant</div>
+        <div class="ph-meta" id="phMeta">Not connected</div></div>
+      <label class="toggle" style="color:#98a2b3;margin:0" title="AIVA speaks aloud"><input type="checkbox" id="voiceOn" checked> 🔊 voice</label>
+    </div>
+    <div class="ph-idle" id="idle">
+      <div style="font-size:42px">📞</div>
+      <div>Tap <b style="color:#fff">Talk to AIVA now</b> to start.<br>Speak with the 🎤 button or type your reply.</div>
+    </div>
+    <div class="chat" id="chat" hidden></div>
+    <div class="status" id="status"></div>
+    <div class="ph-ctrl" id="ctrl" hidden>
+      <button class="mic" id="mic" title="Hands-free voice: tap to start/stop">🎤</button>
+      <input type="text" id="txt" placeholder="Type your reply…">
+      <button class="btn sm" id="send">Send</button>
+      <button class="btn sm red" id="endBtn">End</button>
+    </div>
+  </div>
+</div>
+
+<script src="engine.js"></script>
+<script src="store.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
