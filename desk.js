@@ -146,10 +146,14 @@
       <span class="txt">${esc(r.text)}</span>
       <span class="state">${r.status === 'active' ? 'Active' : 'Pending approval'}</span></li>`).join('');
   }
-  const showRules = on => { $('rules').hidden = $('scrim').hidden = !on; if (on) { renderRules(); $('ruleText').focus(); } };
+  const showRules = on => { $('rules').hidden = $('scrim').hidden = !on; if (on) { $('guide').hidden = true; renderRules(); $('ruleText').focus(); } };
+  const showGuide = on => { $('guide').hidden = $('scrim').hidden = !on; if (on) $('rules').hidden = true; else localStorage.setItem('hs_guide_seen', '1'); };
+  $('openGuide').onclick = () => showGuide(true);
+  document.querySelectorAll('#guide [data-close]').forEach(b => b.onclick = () => showGuide(false));
   $('openRules').onclick = () => showRules(true);
-  $('closeRules').onclick = $('scrim').onclick = () => showRules(false);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') showRules(false); });
+  $('closeRules').onclick = () => showRules(false);
+  $('scrim').onclick = () => { showRules(false); showGuide(false); };
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { showRules(false); showGuide(false); } });
   $('ruleForm').onsubmit = e => {
     e.preventDefault();
     const text = $('ruleText').value.trim(); if (!text) return;
@@ -160,4 +164,5 @@
 
   $('reset').onclick = e => { e.preventDefault(); localStorage.removeItem(KEY); st = load(); open.clear(); render(); };
   render();
+  if (!localStorage.getItem('hs_guide_seen')) showGuide(true);
 })();

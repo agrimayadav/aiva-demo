@@ -12,3 +12,5 @@ Live: https://agrimayadav.github.io/aiva-demo/
 
 State is saved in the browser (localStorage). Use "Reset demo" to restore the sample data.
 The earlier voice-call prototype is still at `call.html`.
+
+- **Guide**: a how-to-use sheet for reviewers that opens on the first visit and can be reopened from the Guide button.

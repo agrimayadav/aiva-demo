@@ -86,3 +86,9 @@ section{margin-bottom:40px}
 .toast button{border:0;background:none;color:#64d2ff;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
 
 @media (max-width:600px){h1{font-size:34px}.hero{flex-direction:column;align-items:flex-start}.fb{margin-left:0}}
+.hero-btns{display:flex;gap:8px}
+.guide h3{font-size:15px;margin:22px 0 8px}
+.guide ul,.guide ol{margin:0;padding-left:20px;font-size:14px}
+.guide li{margin-bottom:8px}
+.guide .tag{font-size:11px;padding:1px 7px}
+.btn.wide{width:100%;justify-content:center;margin-top:24px;padding:12px}

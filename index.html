@@ -15,7 +15,10 @@
       <h1 id="headline">7 callbacks waiting</h1>
       <p id="split" class="split"></p>
     </div>
-    <button id="openRules" class="btn ghost">Handoff rules</button>
+    <div class="hero-btns">
+      <button id="openGuide" class="btn ghost">Guide</button>
+      <button id="openRules" class="btn ghost">Handoff rules</button>
+    </div>
   </header>
 
   <section>
@@ -53,7 +56,37 @@
   </form>
 </aside>
 
-<div id="toast" class="toast" hidden><span id="toastMsg"></span><button id="undo">Undo</button></div>
+<aside id="guide" class="sheet guide" hidden aria-label="Guide">
+  <div class="sheet-head">
+    <h2>How to use this demo</h2>
+    <button class="icon" data-close aria-label="Close">✕</button>
+  </div>
+  <p class="muted">This is the screen HappySmile's front desk would use. AIVA, the AI voice assistant, answers every enquiry call. Calls it can't finish come here for a person to follow up. All data is fictional.</p>
+
+  <h3>What you're looking at</h3>
+  <ul>
+    <li><b>Headline:</b> how many people are waiting for a callback, split by priority. <span class="tag t-P0">P0</span> call within 15 min, <span class="tag t-P1">P1</span> within 1 hr, <span class="tag t-P2">P2</span> today.</li>
+    <li><b>Needs a callback:</b> calls AIVA handed to staff, most urgent first. Each card says why it was handed off.</li>
+    <li><b>Handled by AIVA:</b> calls AIVA finished on its own: <span class="tag t-booked">Booked</span> <span class="tag t-cancelled">Cancelled</span> <span class="tag t-closed">Closed</span> (question answered). Staff only review these.</li>
+  </ul>
+
+  <h3>Try these</h3>
+  <ol>
+    <li>Click <b>Transcript</b> on the unknown P2 caller to read the full call.</li>
+    <li>Click <b>Booked by staff</b> on a callback. The card leaves the queue and the headline count goes down. Click <b>Undo</b> to bring it back.</li>
+    <li>Click <b>Mark complete</b> for a callback that was resolved without a booking.</li>
+    <li>Rate any call 👍 or 👎. This tells the team whether AIVA handled it correctly.</li>
+    <li>Open <b>Handoff rules</b>, type a new rule and click <b>Save rule</b>. It stays grey as <i>Pending approval</i> until the front-desk lead approves it.</li>
+  </ol>
+
+  <h3>Good to know</h3>
+  <ul>
+    <li><b>Call</b> and <b>SMS</b> open your device's phone or messaging app. The numbers are fictional.</li>
+    <li>Your clicks are saved only in your browser. <b>Reset demo</b> at the bottom restores the sample data.</li>
+    <li>"Booked by staff" is counted separately from AIVA bookings, so AIVA's success metric stays honest.</li>
+  </ul>
+  <button class="btn primary wide" data-close>Got it</button>
+</aside><span id="toastMsg"></span><button id="undo">Undo</button></div>
 <script src="desk.js"></script>
 </body>
 </html>
