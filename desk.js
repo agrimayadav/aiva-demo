@@ -1,7 +1,7 @@
 // Happy Smile desk dashboard: front-desk view of calls AIVA has handled or handed off.
 (function () {
   const $ = id => document.getElementById(id);
-  const KEY = 'hs_desk_v1';
+  const KEY = 'hs_desk_v2';
   const TAG = {
     P0: 'P0 · Urgent', P1: 'P1', P2: 'P2',
     booked: 'Booked by AIVA', cancelled: 'Cancelled by AIVA', closed: 'Closed by AIVA'
@@ -10,44 +10,44 @@
 
   const A = t => ({ who: 'AIVA', t }), C = t => ({ who: 'Caller', t });
   const SEED_CALLS = [
-    { id: 1, name: null, phone: '+91 98104 62217', tag: 'P0', ago: '3 min ago', dur: 55,
+    { id: 1, name: null, tag: 'P0', ago: '3 min ago', dur: 55,
       summary: 'Urgent: swelling and severe pain in the lower jaw since last night.',
       reason: 'Urgent symptom reported',
       transcript: [A("Welcome to Happy Smile's AI assistant. This call is being recorded. How can I help you today?"), C('Mere jaw mein bahut swelling hai, kal raat se dard ho raha hai.'), A("I'm sorry to hear that. Since this sounds urgent, I've flagged it for our clinic team. They'll call you within 15 minutes. If you have trouble breathing or swallowing, please go to the nearest emergency room."), C('Okay, thank you.')] },
-    { id: 2, name: 'Rohit Verma', phone: '+91 99580 11834', tag: 'P0', ago: '18 min ago', dur: 48,
+    { id: 2, name: 'Rohit Verma', tag: 'P0', ago: '18 min ago', dur: 48,
       summary: 'Bleeding that has not stopped since an extraction at Dwarka yesterday.',
       reason: 'Urgent symptom reported',
       transcript: [A("Welcome to Happy Smile's AI assistant. This call is being recorded. How can I help you today?"), C('I had a tooth removed at your Dwarka clinic yesterday and it is still bleeding.'), A("Thanks for telling me, Rohit. I've flagged this as urgent and our Dwarka team will call you within 15 minutes.")] },
-    { id: 3, name: 'Neha Gupta', phone: '+91 98731 50492', tag: 'P1', ago: '26 min ago', dur: 95,
+    { id: 3, name: 'Neha Gupta', tag: 'P1', ago: '26 min ago', dur: 95,
       summary: 'Wants an implant consultation at Saket. None of the offered slots worked; prefers a weekday evening.',
       reason: 'Preferred slot not available',
       transcript: [A('How can I help you today?'), C('I want to get an implant consultation at Saket.'), A('At Saket, I can do Saturday at 11 AM or Sunday at 4 PM. Which works better?'), C('Neither, I need a weekday evening.'), A("No problem. I'll ask our Saket front desk to call you with weekday evening options.")] },
-    { id: 4, name: 'Sana Khan', phone: '+91 97119 27705', tag: 'P1', ago: '41 min ago', dur: 70,
+    { id: 4, name: 'Sana Khan', tag: 'P1', ago: '41 min ago', dur: 70,
       summary: 'Asked to speak to a person about her ongoing root canal treatment at Lajpat Nagar.',
       reason: 'Caller asked for a human',
       transcript: [A('How can I help you today?'), C('Mujhe kisi insaan se baat karni hai, mera root canal chal raha hai.'), A('Bilkul. Hamari Lajpat Nagar front desk aapko jaldi call karegi.')] },
-    { id: 5, name: null, phone: '+91 98183 74409', tag: 'P2', ago: '1 hr ago', dur: 120,
+    { id: 5, name: null, tag: 'P2', ago: '1 hr ago', dur: 120,
       summary: 'Asked about the price of braces and whether EMI is available.',
       reason: 'Payment method enquiry',
       transcript: [A('How can I help you today?'), C('Braces ka kitna kharcha hota hai?'), A('Braces usually cost ₹35,000 to ₹90,000. The dentist confirms the exact price after a check-up. The consultation is ₹300.'), C('EMI milega kya? Monthly kitna padega?'), A("Good question. Our front desk can explain the payment plans, so I'll ask them to call you today."), C('Theek hai.')] },
-    { id: 6, name: 'Arjun Singh', phone: '+91 99996 03128', tag: 'P2', ago: '1 hr ago', dur: 64,
+    { id: 6, name: 'Arjun Singh', tag: 'P2', ago: '1 hr ago', dur: 64,
       summary: 'Noisy line. AIVA could not understand the request after 3 tries.',
       reason: 'AI did not understand 3 times',
       transcript: [A('How can I help you today?'), C('[inaudible] … appointment … [inaudible]'), A("Sorry, I didn't quite get that. What would you like to come in for?"), C('[inaudible]'), A("I'm sorry, I'm having trouble understanding you. Our front desk will get back in touch with you soon.")] },
-    { id: 7, name: 'Meera Iyer', phone: '+91 98990 45561', tag: 'P2', ago: '2 hr ago', dur: 25,
+    { id: 7, name: 'Meera Iyer', tag: 'P2', ago: '2 hr ago', dur: 25,
       summary: 'Asked about teeth cleaning at Rohini and hung up after hearing the slots.',
       reason: 'Call ended before booking',
       transcript: [A('How can I help you today?'), C('Teeth cleaning, Rohini.'), A('At Rohini, I can do Friday at 6 PM or Saturday at 10 AM. Which one works better for you?'), C('[call ended]')] },
-    { id: 8, name: 'Karan Mehta', phone: '+91 98111 23456', tag: 'booked', ago: '5 min ago', dur: 40, conf: 85,
+    { id: 8, name: 'Karan Mehta', tag: 'booked', ago: '5 min ago', dur: 40, conf: 85,
       summary: 'Booked teeth whitening at Saket, Sunday 11 AM.',
       transcript: [A("Welcome to Happy Smile's AI assistant. This call is being recorded. How can I help you today?"), C('Hi, I want teeth whitening.'), A('Okay, teeth whitening. Which clinic is easiest for you? We have Saket, Dwarka, Rohini and Lajpat Nagar.'), C('Saket.'), A('At Saket, I can do Sunday at 11 AM or Sunday at 3 PM.'), C('11 is good.'), A('And what name should I put the booking under?'), C('Karan.'), A("All done, Karan! You're booked for Sunday at 11 AM at Saket. Anything else?"), C('No, thanks.')] },
-    { id: 9, name: 'Ananya Rao', phone: '+91 97170 88213', tag: 'booked', ago: '34 min ago', dur: 55, conf: 92,
+    { id: 9, name: 'Ananya Rao', tag: 'booked', ago: '34 min ago', dur: 55, conf: 92,
       summary: 'Booked a braces consultation at Dwarka, Saturday 4 PM.',
       transcript: [A('How can I help you today?'), C('Braces consultation, Dwarka.'), A('At Dwarka, I can do Saturday at 11 AM or 4 PM.'), C('4 PM.'), A("All done, Ananya! You're booked for Saturday at 4 PM at Dwarka.")] },
-    { id: 10, name: 'Vikram Malhotra', phone: '+91 98100 67721', tag: 'cancelled', ago: '52 min ago', dur: 35,
+    { id: 10, name: 'Vikram Malhotra', tag: 'cancelled', ago: '52 min ago', dur: 35,
       summary: 'Cancelled his cleaning at Rohini, Friday 6 PM. Did not want to reschedule.',
       transcript: [A('How can I help you today?'), C('I need to cancel my cleaning on Friday.'), A("I've cancelled your Friday 6 PM cleaning at Rohini. Would you like to pick another time?"), C('Not now, thanks.')] },
-    { id: 11, name: 'Pooja Bansal', phone: '+91 99712 30984', tag: 'closed', ago: '1 hr ago', dur: 30,
+    { id: 11, name: 'Pooja Bansal', tag: 'closed', ago: '1 hr ago', dur: 30,
       summary: 'Asked for Lajpat Nagar timings and location. Answered; no booking needed.',
       transcript: [A('How can I help you today?'), C('Lajpat Nagar clinic kab khulta hai?'), A('Hamara Lajpat Nagar clinic Monday to Saturday, 10 AM se 8 PM tak khula hai, Ring Road par, metro station ke paas.'), C('Okay thanks.')] }
   ];
@@ -75,22 +75,21 @@
   const rank = { P0: 0, P1: 1, P2: 2 };
 
   function card(c) {
-    const fn = first(c), tel = c.phone.replace(/\s/g, '');
+    const fn = first(c);
     const meta = [c.conf != null ? 'Booking confidence ' + c.conf + '%' : null, dur(c.dur)].filter(Boolean).join(' · ');
     const cb = isCallback(c);
     return `<article class="card" data-id="${c.id}">
       <div class="top">
         <span class="name">${esc(c.name || 'Unknown caller')}</span>
         <span class="tag t-${c.tag}">${TAG[c.tag]}</span>
-        <span class="phone">${esc(c.phone)}</span>
         <span class="ago">${esc(c.ago)}</span>
       </div>
       <p class="summary">${esc(c.summary)}</p>
       <p class="meta">${meta}</p>
       ${cb ? `<p class="reason">Handed off: <b>${esc(c.reason)}</b> · ${PRI_HINT[c.tag]}</p>` : ''}
       <div class="actions">
-        <a class="btn ${cb ? 'primary' : 'soft'}" href="tel:${tel}">Call ${esc(fn || 'back')}</a>
-        <a class="btn soft" href="sms:${tel}">SMS ${esc(fn || '')}</a>
+        <button class="btn ${cb ? 'primary' : 'soft'}" data-act="call">Call ${esc(fn || 'back')}</button>
+        <button class="btn soft" data-act="sms">SMS ${esc(fn || '')}</button>
         ${cb ? `<button class="btn soft" data-act="staff">Booked by staff</button>` : ''}
         <button class="btn soft" data-act="done">Mark complete</button>
         <button class="btn link" data-act="tx">${open.has(c.id) ? 'Hide transcript' : 'Transcript'}</button>
@@ -135,6 +134,7 @@
     const el = b.closest('.card'), c = st.calls.find(x => x.id === +el.dataset.id); if (!c) return;
     const a = b.dataset.act;
     if (a === 'tx') { open.has(c.id) ? open.delete(c.id) : open.add(c.id); render(); }
+    else if (a === 'call' || a === 'sms') toast(`${a === 'call' ? 'Calling' : 'Opening SMS to'} ${c.name || 'caller'} (demo only)`, null);
     else if (a === 'up' || a === 'down') { c.fb = c.fb === a ? null : a; save(); render(); }
     else resolve(c, a, el);
   });
